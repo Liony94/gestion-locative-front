@@ -1,3 +1,6 @@
+'use client';
+import Link from 'next/link';
+
 export default function Hero() {
     return (
         <section className="relative min-h-screen flex items-center justify-center bg-gradient-to-br from-blue-50 via-white to-purple-50 dark:from-gray-900 dark:via-gray-800 dark:to-blue-900 overflow-hidden">
@@ -21,14 +24,20 @@ export default function Hero() {
                     </p>
 
                     <div className="flex flex-col sm:flex-row gap-6 justify-center items-center">
-                        <button className="group relative px-8 py-4 rounded-xl bg-gradient-to-r from-blue-600 to-purple-600 text-white font-semibold text-lg hover:shadow-2xl hover:scale-105 transition-all duration-300 w-64">
+                        <Link
+                            href="/auth/register"
+                            className="group relative px-8 py-4 rounded-xl bg-gradient-to-r from-blue-600 to-purple-600 text-white font-semibold text-lg hover:shadow-2xl hover:scale-105 transition-all duration-300 w-64"
+                        >
                             <span className="absolute inset-0 w-full h-full rounded-xl bg-gradient-to-r from-blue-600 to-purple-600 filter blur-lg opacity-0 group-hover:opacity-70 transition-opacity"></span>
                             <span className="relative">Commencer maintenant 🚀</span>
-                        </button>
+                        </Link>
 
-                        <button className="px-8 py-4 rounded-xl bg-white dark:bg-gray-800 text-blue-600 dark:text-blue-400 font-semibold text-lg border-2 border-blue-600 dark:border-blue-400 hover:bg-blue-50 dark:hover:bg-gray-700 hover:shadow-xl transition-all duration-300 w-64">
-                            En savoir plus 📚
-                        </button>
+                        <Link
+                            href="/auth/login"
+                            className="px-8 py-4 rounded-xl bg-white dark:bg-gray-800 text-blue-600 dark:text-blue-400 font-semibold text-lg border-2 border-blue-600 dark:border-blue-400 hover:bg-blue-50 dark:hover:bg-gray-700 hover:shadow-xl transition-all duration-300 w-64"
+                        >
+                            Se connecter 📚
+                        </Link>
                     </div>
 
                     <div className="mt-16 flex justify-center items-center gap-8 flex-wrap">

@@ -1,20 +1,21 @@
 'use client';
 import { useState, useEffect } from 'react';
 import Link from 'next/link';
-import { useRouter } from 'next/navigation';
+import { useRouter, usePathname } from 'next/navigation';
 import { useAuth } from '@/hooks/useAuth';
 
 const navigation = [
-    { name: 'Tableau de bord', href: '/dashboard', current: true },
-    { name: 'Propriétés', href: '/dashboard/properties', current: false },
-    { name: 'Locataires', href: '/dashboard/tenants', current: false },
-    { name: 'Documents', href: '/dashboard/documents', current: false },
-    { name: 'Comptabilité', href: '/dashboard/accounting', current: false },
+    { name: 'Tableau de bord', href: '/dashboard' },
+    { name: 'Propriétés', href: '/dashboard/properties' },
+    { name: 'Locataires', href: '/dashboard/tenants' },
+    { name: 'Documents', href: '/dashboard/documents' },
+    { name: 'Comptabilité', href: '/dashboard/accounting' },
 ];
 
 export default function DashboardHeader() {
     const [isProfileOpen, setIsProfileOpen] = useState(false);
     const router = useRouter();
+    const pathname = usePathname();
     const { user, loading, logout } = useAuth();
 
     const handleLogout = () => {
@@ -78,7 +79,7 @@ export default function DashboardHeader() {
                                 <Link
                                     key={item.name}
                                     href={item.href}
-                                    className={`inline-flex items-center px-1 pt-1 text-sm font-medium border-b-2 ${item.current
+                                    className={`inline-flex items-center px-1 pt-1 text-sm font-medium border-b-2 ${pathname === item.href
                                         ? 'border-blue-500 text-gray-900 dark:text-white'
                                         : 'border-transparent text-gray-500 dark:text-gray-400 hover:border-gray-300 hover:text-gray-700 dark:hover:text-gray-300'
                                         }`}
@@ -92,9 +93,12 @@ export default function DashboardHeader() {
                     {/* Actions et Profil */}
                     <div className="flex items-center space-x-4">
                         {/* Bouton Nouveau */}
-                        <button className="inline-flex items-center px-4 py-2 border border-transparent text-sm font-medium rounded-lg shadow-sm text-white bg-blue-600 hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500">
-                            + Nouveau
-                        </button>
+                        <Link
+                            href="/dashboard/properties/new"
+                            className="inline-flex items-center px-4 py-2 border border-transparent text-sm font-medium rounded-lg shadow-sm text-white bg-blue-600 hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500"
+                        >
+                            + Nouveau bien
+                        </Link>
 
                         {/* Notifications */}
                         <button className="p-2 text-gray-400 hover:text-gray-500 dark:hover:text-gray-300">

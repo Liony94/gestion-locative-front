@@ -1,11 +1,20 @@
 'use client';
 import { useState } from 'react';
 import Link from 'next/link';
-import { useRouter } from 'next/navigation';
+import { useRouter, useSearchParams } from 'next/navigation';
 import { authApi } from '@/services/api';
+import { UserRole } from '../register/page';
+import { jwtDecode } from 'jwt-decode';
+
+interface JwtPayload {
+    email: string;
+    sub: number;
+    role: string;
+}
 
 export default function LoginPage() {
     const router = useRouter();
+    const searchParams = useSearchParams();
     const [formData, setFormData] = useState({
         email: '',
         password: '',
@@ -21,8 +30,24 @@ export default function LoginPage() {
         try {
             const data = await authApi.login(formData);
             localStorage.setItem('token', data.access_token);
-            router.push('/dashboard');
+
+            // Décoder le token pour obtenir les informations de l'utilisateur
+            const decodedToken = jwtDecode<JwtPayload>(data.access_token);
+            console.log('Token décodé:', decodedToken);
+            console.log('Role dans le token:', decodedToken.role);
+            console.log('UserRole.TENANT:', UserRole.TENANT);
+            console.log('Comparaison:', decodedToken.role === UserRole.TENANT);
+
+            // Redirection en fonction du rôle
+            if (decodedToken.role.toLowerCase() === UserRole.TENANT) {
+                console.log('Redirection vers le dashboard locataire');
+                router.push('/dashboard/tenant');
+            } else {
+                console.log('Redirection vers le dashboard propriétaire');
+                router.push('/dashboard');
+            }
         } catch (err) {
+            console.error('Erreur de connexion:', err);
             setError(err instanceof Error ? err.message : 'Une erreur est survenue');
         } finally {
             setIsLoading(false);
@@ -37,7 +62,10 @@ export default function LoginPage() {
                         Connexion 🔐
                     </h2>
                     <p className="text-gray-600 dark:text-gray-400">
-                        Ravis de vous revoir ! Connectez-vous à votre compte.
+                        {searchParams.get('registered')
+                            ? 'Votre compte a été créé avec succès ! Connectez-vous maintenant.'
+                            : 'Ravis de vous revoir ! Connectez-vous à votre compte.'
+                        }
                     </p>
                 </div>
 

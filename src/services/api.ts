@@ -10,10 +10,24 @@ interface RegisterData {
     lastName: string;
     email: string;
     password: string;
+    role: string;
+    phone?: string;
+    address?: string;
+}
+
+interface LoginResponse {
+    access_token: string;
+    user: {
+        id: number;
+        email: string;
+        firstName: string;
+        lastName: string;
+        role: string;
+    };
 }
 
 export const authApi = {
-    login: async (data: LoginData) => {
+    login: async (data: LoginData): Promise<LoginResponse> => {
         const response = await fetch(`${API_URL}/api/auth/login`, {
             method: 'POST',
             headers: {

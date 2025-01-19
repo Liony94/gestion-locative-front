@@ -3,8 +3,9 @@ import { useState, useEffect } from 'react';
 import Link from 'next/link';
 import { useRouter, usePathname } from 'next/navigation';
 import { useAuth } from '@/hooks/useAuth';
+import { UserRole } from '@/app/auth/register/page';
 
-const navigation = [
+const ownerNavigation = [
     { name: 'Tableau de bord', href: '/dashboard' },
     { name: 'Propriétés', href: '/dashboard/properties' },
     { name: 'Locataires', href: '/dashboard/tenants' },
@@ -12,11 +13,19 @@ const navigation = [
     { name: 'Comptabilité', href: '/dashboard/accounting' },
 ];
 
+const tenantNavigation = [
+    { name: 'Tableau de bord', href: '/dashboard/tenant' },
+    { name: 'Documents', href: '/dashboard/documents' },
+    { name: 'Paiements', href: '/dashboard/payments' },
+];
+
 export default function DashboardHeader() {
     const [isProfileOpen, setIsProfileOpen] = useState(false);
     const router = useRouter();
     const pathname = usePathname();
     const { user, loading, logout } = useAuth();
+
+    const navigation = user?.role === UserRole.OWNER ? ownerNavigation : tenantNavigation;
 
     const handleLogout = () => {
         logout();
@@ -92,13 +101,15 @@ export default function DashboardHeader() {
 
                     {/* Actions et Profil */}
                     <div className="flex items-center space-x-4">
-                        {/* Bouton Nouveau */}
-                        <Link
-                            href="/dashboard/properties/new"
-                            className="inline-flex items-center px-4 py-2 border border-transparent text-sm font-medium rounded-lg shadow-sm text-white bg-blue-600 hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500"
-                        >
-                            + Nouveau bien
-                        </Link>
+                        {/* Bouton Nouveau - uniquement pour les propriétaires */}
+                        {user?.role === UserRole.OWNER && (
+                            <Link
+                                href="/dashboard/properties/new"
+                                className="inline-flex items-center px-4 py-2 border border-transparent text-sm font-medium rounded-lg shadow-sm text-white bg-blue-600 hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500"
+                            >
+                                + Nouveau bien
+                            </Link>
+                        )}
 
                         {/* Notifications */}
                         <button className="p-2 text-gray-400 hover:text-gray-500 dark:hover:text-gray-300">
@@ -124,7 +135,7 @@ export default function DashboardHeader() {
 
                             {/* Menu profil */}
                             {isProfileOpen && user && (
-                                <div className="absolute right-0 mt-2 w-48 rounded-md shadow-lg bg-white dark:bg-gray-700 ring-1 ring-black ring-opacity-5">
+                                <div className="absolute right-0 mt-2 w-48 rounded-md shadow-lg bg-white dark:bg-gray-700 ring-1 ring-black ring-opacity-5 z-50">
                                     <div className="py-1" role="menu">
                                         <div className="px-4 py-2 text-sm text-gray-700 dark:text-gray-200 border-b border-gray-200 dark:border-gray-600">
                                             <div className="font-medium">{getFullName()}</div>

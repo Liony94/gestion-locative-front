@@ -14,6 +14,7 @@ interface Property {
     zipCode: string;
     type: string;
     surface: number;
+    image: string;
 }
 
 export default function PropertiesPage() {

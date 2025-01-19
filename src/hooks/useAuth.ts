@@ -1,9 +1,11 @@
 import { useState, useEffect } from 'react';
+import { UserRole } from '@/app/auth/register/page';
 
 interface User {
     firstName: string;
     lastName: string;
     email: string;
+    role: UserRole;
 }
 
 export function useAuth() {
@@ -33,7 +35,8 @@ export function useAuth() {
                     const formattedUser = {
                         firstName: userData.first_name || userData.firstName,
                         lastName: userData.last_name || userData.lastName,
-                        email: userData.email
+                        email: userData.email,
+                        role: userData.role as UserRole
                     };
 
                     console.log('Données utilisateur formatées:', formattedUser);

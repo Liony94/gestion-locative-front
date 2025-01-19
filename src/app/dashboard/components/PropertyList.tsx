@@ -25,20 +25,22 @@ export default function PropertyList() {
         const fetchProperties = async () => {
             try {
                 const token = localStorage.getItem('token');
-                const response = await fetch(`${process.env.NEXT_PUBLIC_BACKEND_URL}/api/properties`, {
+                const response = await fetch(`${process.env.NEXT_PUBLIC_BACKEND_URL}/api/properties/owner`, {
                     headers: {
-                        'Authorization': `Bearer ${token}`
+                        'Authorization': `Bearer ${token}`,
+                        'Content-Type': 'application/json'
                     }
                 });
 
-                if (response.ok) {
-                    const data = await response.json();
-                    setProperties(data);
-                } else {
-                    setError('Impossible de charger les propriétés');
+                if (!response.ok) {
+                    throw new Error(`HTTP error! status: ${response.status}`);
                 }
+
+                const data = await response.json();
+                setProperties(data);
             } catch (err) {
-                setError('Une erreur est survenue lors de la communication avec le serveur');
+                setError('Une erreur est survenue lors de la récupération de vos propriétés');
+                console.error('Erreur:', err);
             } finally {
                 setLoading(false);
             }

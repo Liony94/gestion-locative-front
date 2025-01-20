@@ -1,5 +1,7 @@
 'use client';
 
+import Link from 'next/link';
+
 interface Property {
     id: number;
     title: string;
@@ -17,9 +19,19 @@ interface PropertyCardProps {
     property: Property;
 }
 
+const createSlug = (title: string): string => {
+    return title
+        .toLowerCase()
+        .normalize('NFD')
+        .replace(/[\u0300-\u036f]/g, '') // Supprime les accents
+        .replace(/[^a-z0-9]+/g, '-')     // Remplace les caractères spéciaux par des tirets
+        .replace(/^-+|-+$/g, '');        // Supprime les tirets au début et à la fin
+};
+
 export default function PropertyCard({ property }: PropertyCardProps) {
     // Image par défaut si aucune image n'est fournie
     const defaultImage = 'https://images.unsplash.com/photo-1518780664697-55e3ad937233?ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D&auto=format&fit=crop&w=2340&q=80';
+    const slug = `${property.id}-${createSlug(property.title)}`;
 
     return (
         <div className="bg-white dark:bg-gray-800 rounded-lg shadow-md hover:shadow-lg transition-shadow duration-300">
@@ -71,9 +83,12 @@ export default function PropertyCard({ property }: PropertyCardProps) {
                 </p>
 
                 <div className="mt-6 flex justify-end space-x-3">
-                    <button className="px-3 py-1.5 text-sm font-medium text-gray-700 dark:text-gray-300 bg-white dark:bg-gray-800 border border-gray-300 dark:border-gray-600 rounded-md hover:bg-gray-50 dark:hover:bg-gray-700">
+                    <Link
+                        href={`/dashboard/owner/properties/${slug}`}
+                        className="px-3 py-1.5 text-sm font-medium text-gray-700 dark:text-gray-300 bg-white dark:bg-gray-800 border border-gray-300 dark:border-gray-600 rounded-md hover:bg-gray-50 dark:hover:bg-gray-700"
+                    >
                         Détails
-                    </button>
+                    </Link>
                     <button className="px-3 py-1.5 text-sm font-medium text-white bg-blue-600 border border-transparent rounded-md hover:bg-blue-700">
                         Modifier
                     </button>

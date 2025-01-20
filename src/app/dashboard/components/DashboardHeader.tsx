@@ -7,16 +7,16 @@ import { UserRole } from '@/app/auth/register/page';
 
 const ownerNavigation = [
     { name: 'Tableau de bord', href: '/dashboard' },
-    { name: 'Propriétés', href: '/dashboard/properties' },
-    { name: 'Locataires', href: '/dashboard/tenants' },
-    { name: 'Documents', href: '/dashboard/documents' },
-    { name: 'Comptabilité', href: '/dashboard/accounting' },
+    { name: 'Propriétés', href: '/dashboard/owner/properties' },
+    { name: 'Locataires', href: '/dashboard/owner/tenants' },
+    { name: 'Documents', href: '/dashboard/owner/documents' },
+    { name: 'Comptabilité', href: '/dashboard/owner/accounting' },
 ];
 
 const tenantNavigation = [
     { name: 'Tableau de bord', href: '/dashboard/tenant' },
-    { name: 'Documents', href: '/dashboard/documents' },
-    { name: 'Paiements', href: '/dashboard/payments' },
+    { name: 'Documents', href: '/dashboard/tenant/documents' },
+    { name: 'Paiements', href: '/dashboard/tenant/payments' },
 ];
 
 export default function DashboardHeader() {
@@ -104,7 +104,7 @@ export default function DashboardHeader() {
                         {/* Bouton Nouveau - uniquement pour les propriétaires */}
                         {user?.role === UserRole.OWNER && (
                             <Link
-                                href="/dashboard/properties/new"
+                                href="/dashboard/owner/properties/new"
                                 className="inline-flex items-center px-4 py-2 border border-transparent text-sm font-medium rounded-lg shadow-sm text-white bg-blue-600 hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500"
                             >
                                 + Nouveau bien

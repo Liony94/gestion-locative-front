@@ -1,29 +1,34 @@
 'use client';
 
 import { useState, useEffect } from 'react';
-import Link from 'next/link';
-import PropertyCard from './components/PropertyCard';
+import TenantsCard from './components/TenantsCard';
 
 interface Property {
     id: number;
     title: string;
-    description: string;
-    price: number;
     address: string;
     city: string;
-    zipCode: string;
     type: string;
-    surface: number;
-    image: string;
 }
 
-export default function PropertiesPage() {
-    const [properties, setProperties] = useState<Property[]>([]);
+interface Tenant {
+    id: number;
+    email: string;
+    firstName: string;
+    lastName: string;
+    role: string;
+    phone: string;
+    address: string;
+    properties: Property[];
+}
+
+export default function TenantsPage() {
+    const [tenants, setTenants] = useState<Tenant[]>([]);
     const [loading, setLoading] = useState(true);
     const [error, setError] = useState<string | null>(null);
 
     useEffect(() => {
-        const fetchProperties = async () => {
+        const fetchTenants = async () => {
             try {
                 const token = localStorage.getItem('token');
                 const response = await fetch(`${process.env.NEXT_PUBLIC_BACKEND_URL}/api/properties/owner`, {
@@ -33,10 +38,31 @@ export default function PropertiesPage() {
                 });
 
                 if (response.ok) {
-                    const data = await response.json();
-                    setProperties(data);
+                    const properties = await response.json();
+                    // Transformer les données pour regrouper par locataire
+                    const tenantsMap = new Map<number, Tenant>();
+
+                    properties.forEach((property: any) => {
+                        property.tenants.forEach((tenant: Tenant) => {
+                            if (!tenantsMap.has(tenant.id)) {
+                                tenantsMap.set(tenant.id, {
+                                    ...tenant,
+                                    properties: []
+                                });
+                            }
+                            tenantsMap.get(tenant.id)?.properties.push({
+                                id: property.id,
+                                title: property.title,
+                                address: property.address,
+                                city: property.city,
+                                type: property.type
+                            });
+                        });
+                    });
+
+                    setTenants(Array.from(tenantsMap.values()));
                 } else {
-                    setError('Impossible de charger les propriétés');
+                    setError('Impossible de charger les locataires');
                 }
             } catch (err) {
                 setError('Une erreur est survenue lors de la communication avec le serveur');
@@ -45,7 +71,7 @@ export default function PropertiesPage() {
             }
         };
 
-        fetchProperties();
+        fetchTenants();
     }, []);
 
     if (loading) {
@@ -75,21 +101,15 @@ export default function PropertiesPage() {
             <div className="flex justify-between items-center mb-6">
                 <div>
                     <h1 className="text-2xl font-bold text-gray-900 dark:text-white">
-                        Mes propriétés
+                        Mes locataires
                     </h1>
                     <p className="mt-1 text-sm text-gray-600 dark:text-gray-400">
-                        Gérez vos biens immobiliers
+                        Gérez vos locataires et leurs biens associés
                     </p>
                 </div>
-                <Link
-                    href="/dashboard/properties/new"
-                    className="inline-flex items-center px-4 py-2 border border-transparent text-sm font-medium rounded-md shadow-sm text-white bg-blue-600 hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500"
-                >
-                    + Ajouter un bien
-                </Link>
             </div>
 
-            {properties.length === 0 ? (
+            {tenants.length === 0 ? (
                 <div className="text-center py-12">
                     <svg
                         className="mx-auto h-12 w-12 text-gray-400"
@@ -102,31 +122,23 @@ export default function PropertiesPage() {
                             strokeLinecap="round"
                             strokeLinejoin="round"
                             strokeWidth={2}
-                            d="M19 21V5a2 2 0 00-2-2H7a2 2 0 00-2 2v16m14 0h2m-2 0h-5m-9 0H3m2 0h5M9 7h1m-1 4h1m4-4h1m-1 4h1m-5 10v-5a1 1 0 011-1h2a1 1 0 011 1v5m-4 0h4"
+                            d="M17 20h5v-2a3 3 0 00-5.356-1.857M17 20H7m10 0v-2c0-.656-.126-1.283-.356-1.857M7 20H2v-2a3 3 0 015.356-1.857M7 20v-2c0-.656.126-1.283.356-1.857m0 0a5.002 5.002 0 019.288 0M15 7a3 3 0 11-6 0 3 3 0 016 0zm6 3a2 2 0 11-4 0 2 2 0 014 0zM7 10a2 2 0 11-4 0 2 2 0 014 0z"
                         />
                     </svg>
                     <h3 className="mt-2 text-sm font-medium text-gray-900 dark:text-white">
-                        Aucune propriété
+                        Aucun locataire
                     </h3>
                     <p className="mt-1 text-sm text-gray-500 dark:text-gray-400">
-                        Commencez par ajouter votre premier bien immobilier.
+                        Vous n'avez pas encore de locataire associé à vos biens.
                     </p>
-                    <div className="mt-6">
-                        <Link
-                            href="/dashboard/properties/new"
-                            className="inline-flex items-center px-4 py-2 border border-transparent shadow-sm text-sm font-medium rounded-md text-white bg-blue-600 hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500"
-                        >
-                            + Ajouter un bien
-                        </Link>
-                    </div>
                 </div>
             ) : (
                 <div className="grid grid-cols-1 gap-6 sm:grid-cols-2 lg:grid-cols-3">
-                    {properties.map((property) => (
-                        <PropertyCard key={property.id} property={property} />
+                    {tenants.map((tenant) => (
+                        <TenantsCard key={tenant.id} tenant={tenant} />
                     ))}
                 </div>
             )}
         </div>
     );
-} 
+}

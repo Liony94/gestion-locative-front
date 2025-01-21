@@ -39,6 +39,7 @@ export interface Payment {
     paymentMethod: 'BANK_TRANSFER' | 'CASH' | 'CHECK' | 'CREDIT_CARD' | null;
     transactionId: string | null;
     notes: string | null;
+    isArchived: boolean;
     createdAt: string;
     updatedAt: string;
     paymentSchedule?: PaymentSchedule;

@@ -15,9 +15,11 @@ import { PaymentStatus } from '@/types/enums';
 import { formatDate, formatPrice } from '@/lib/utils';
 import { Payment } from '@/types/payment';
 import RecordPaymentModal from '@/app/dashboard/owner/accounting/components/RecordPaymentModal';
-import { Building2, User2, MapPin } from 'lucide-react';
+import { Building2, User2, MapPin, Archive, Undo } from 'lucide-react';
 import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from "@/components/ui/tooltip";
 import PaymentDetailsModal from './PaymentDetailsModal';
+import { toast } from 'sonner';
+import { api } from '@/services/api';
 
 interface PaymentListProps {
     payments: Payment[];
@@ -28,6 +30,8 @@ interface PaymentListProps {
         start: Date | null;
         end: Date | null;
     };
+    showArchived?: boolean;
+    onPaymentsUpdate?: () => void;
 }
 
 export default function PaymentList({
@@ -35,15 +39,54 @@ export default function PaymentList({
     status,
     selectedTenant = 'all',
     selectedProperty = 'all',
-    dateRange
+    dateRange,
+    showArchived = false,
+    onPaymentsUpdate
 }: PaymentListProps) {
     const [selectedPayment, setSelectedPayment] = useState<Payment | null>(null);
     const [showRecordModal, setShowRecordModal] = useState(false);
     const [isClient, setIsClient] = useState(false);
+    const [selectedPayments, setSelectedPayments] = useState<Set<number>>(new Set());
 
     useEffect(() => {
         setIsClient(true);
     }, []);
+
+    const handleArchivePayment = async (paymentId: number) => {
+        try {
+            await api.put(`/payments/${paymentId}/archive`, {});
+            toast.success('Paiement archivé avec succès');
+            onPaymentsUpdate?.();
+        } catch (error) {
+            toast.error('Erreur lors de l\'archivage du paiement');
+            console.error('Erreur:', error);
+        }
+    };
+
+    const handleUnarchivePayment = async (paymentId: number) => {
+        try {
+            await api.put(`/payments/${paymentId}/unarchive`, {});
+            toast.success('Paiement désarchivé avec succès');
+            onPaymentsUpdate?.();
+        } catch (error) {
+            toast.error('Erreur lors de la désarchivage du paiement');
+            console.error('Erreur:', error);
+        }
+    };
+
+    const handleArchiveSelected = async () => {
+        try {
+            await api.post('/payments/archive-multiple', {
+                paymentIds: Array.from(selectedPayments)
+            });
+            toast.success('Paiements archivés avec succès');
+            setSelectedPayments(new Set());
+            onPaymentsUpdate?.();
+        } catch (error) {
+            toast.error('Erreur lors de l\'archivage des paiements');
+            console.error('Erreur:', error);
+        }
+    };
 
     const getStatusBadge = (payment: Payment) => {
         switch (payment.status) {
@@ -119,6 +162,9 @@ export default function PaymentList({
 
     // Filtrer les paiements selon tous les critères
     const filteredPayments = payments.filter(payment => {
+        // Filtre par archivage
+        if (payment.isArchived !== showArchived) return false;
+
         // Filtre par statut
         if (status !== 'all') {
             if (status === 'paid' && payment.status !== 'PAID') return false;
@@ -161,10 +207,41 @@ export default function PaymentList({
 
     return (
         <div className="space-y-4 animate-fade-in">
+            {selectedPayments.size > 0 && (
+                <div className="flex justify-between items-center p-4 bg-gray-50 dark:bg-gray-800 rounded-lg border border-gray-200 dark:border-gray-700">
+                    <span className="text-sm text-gray-600 dark:text-gray-300">
+                        {selectedPayments.size} paiement(s) sélectionné(s)
+                    </span>
+                    <Button
+                        variant="outline"
+                        size="sm"
+                        onClick={handleArchiveSelected}
+                        className="flex items-center gap-2"
+                    >
+                        <Archive className="h-4 w-4" />
+                        Archiver la sélection
+                    </Button>
+                </div>
+            )}
+
             <div className="rounded-lg border border-gray-100 dark:border-gray-700 shadow-sm overflow-hidden bg-white dark:bg-gray-800">
                 <Table>
                     <TableHeader>
                         <TableRow className="bg-gray-50 dark:bg-gray-800/50 hover:bg-gray-50 dark:hover:bg-gray-800/50">
+                            <TableHead className="w-[30px] text-center">
+                                <input
+                                    type="checkbox"
+                                    onChange={(e) => {
+                                        if (e.target.checked) {
+                                            setSelectedPayments(new Set(filteredPayments.map(p => p.id)));
+                                        } else {
+                                            setSelectedPayments(new Set());
+                                        }
+                                    }}
+                                    checked={selectedPayments.size === filteredPayments.length && filteredPayments.length > 0}
+                                    className="rounded border-gray-300 text-primary focus:ring-primary"
+                                />
+                            </TableHead>
                             <TableHead className="font-semibold text-gray-600 dark:text-gray-300">Date d'échéance</TableHead>
                             <TableHead className="font-semibold text-gray-600 dark:text-gray-300">Locataire</TableHead>
                             <TableHead className="font-semibold text-gray-600 dark:text-gray-300">Propriété</TableHead>
@@ -188,6 +265,8 @@ export default function PaymentList({
                                         [animation-delay:${index * 50}ms]
                                         opacity-0
                                         dark:border-gray-700
+                                        ${selectedPayments.has(payment.id) ? 'bg-gray-50 dark:bg-gray-700/30' : ''}
+                                        cursor-pointer
                                     `}
                                     style={{ animationFillMode: 'forwards' }}
                                     onClick={() => {
@@ -196,6 +275,23 @@ export default function PaymentList({
                                         }
                                     }}
                                 >
+                                    <TableCell className="w-[30px] text-center">
+                                        <input
+                                            type="checkbox"
+                                            checked={selectedPayments.has(payment.id)}
+                                            onChange={(e) => {
+                                                const newSelected = new Set(selectedPayments);
+                                                if (e.target.checked) {
+                                                    newSelected.add(payment.id);
+                                                } else {
+                                                    newSelected.delete(payment.id);
+                                                }
+                                                setSelectedPayments(newSelected);
+                                            }}
+                                            onClick={(e) => e.stopPropagation()}
+                                            className="rounded border-gray-300 text-primary focus:ring-primary"
+                                        />
+                                    </TableCell>
                                     <TableCell className="font-medium text-gray-700 dark:text-gray-200">
                                         {isClient ? formatDate(payment.dueDate) : ''}
                                     </TableCell>
@@ -252,23 +348,47 @@ export default function PaymentList({
                                     </TableCell>
                                     <TableCell>{getStatusBadge(payment)}</TableCell>
                                     <TableCell>
-                                        {payment.status !== PaymentStatus.PAID && (
-                                            <Button
-                                                variant="outline"
-                                                size="sm"
-                                                onClick={(e) => {
-                                                    e.stopPropagation();
-                                                    setSelectedPayment(payment);
-                                                    setShowRecordModal(true);
-                                                }}
-                                                className="opacity-0 group-hover:opacity-100 transition-all duration-200 
-                                                    hover:bg-primary/90 hover:text-white dark:border-gray-600 
-                                                    dark:text-gray-300 dark:hover:bg-primary/80 dark:hover:text-white 
-                                                    hover:scale-105"
-                                            >
-                                                Enregistrer le paiement
-                                            </Button>
-                                        )}
+                                        <div className="flex items-center gap-2">
+                                            {payment.status !== PaymentStatus.PAID && !payment.isArchived && (
+                                                <Button
+                                                    variant="outline"
+                                                    size="sm"
+                                                    onClick={(e) => {
+                                                        e.stopPropagation();
+                                                        setSelectedPayment(payment);
+                                                        setShowRecordModal(true);
+                                                    }}
+                                                    className="opacity-0 group-hover:opacity-100 transition-all duration-200"
+                                                >
+                                                    Enregistrer le paiement
+                                                </Button>
+                                            )}
+                                            {!payment.isArchived ? (
+                                                <Button
+                                                    variant="ghost"
+                                                    size="sm"
+                                                    onClick={(e) => {
+                                                        e.stopPropagation();
+                                                        handleArchivePayment(payment.id);
+                                                    }}
+                                                    className="opacity-0 group-hover:opacity-100 transition-all duration-200"
+                                                >
+                                                    <Archive className="h-4 w-4" />
+                                                </Button>
+                                            ) : (
+                                                <Button
+                                                    variant="ghost"
+                                                    size="sm"
+                                                    onClick={(e) => {
+                                                        e.stopPropagation();
+                                                        handleUnarchivePayment(payment.id);
+                                                    }}
+                                                    className="opacity-0 group-hover:opacity-100 transition-all duration-200"
+                                                >
+                                                    <Undo className="h-4 w-4" />
+                                                </Button>
+                                            )}
+                                        </div>
                                     </TableCell>
                                 </TableRow>
                             );

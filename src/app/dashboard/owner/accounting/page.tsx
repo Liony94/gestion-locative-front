@@ -11,6 +11,9 @@ import { Button } from '@/components/ui/button';
 import { Plus, RotateCw } from 'lucide-react';
 import CreatePaymentScheduleModal from './components/CreatePaymentScheduleModal';
 import { toast } from 'sonner';
+import { Tabs, TabsList, TabsTrigger } from '@/components/ui/tabs';
+import { Badge } from '@/components/ui/badge';
+import { formatPrice } from '@/lib/utils';
 
 export default function AccountingPage() {
     const [payments, setPayments] = useState<Payment[]>([]);
@@ -20,115 +23,105 @@ export default function AccountingPage() {
     const [isLoading, setIsLoading] = useState(true);
     const [error, setError] = useState<string | null>(null);
     const [showCreateModal, setShowCreateModal] = useState(false);
-    const [activeFilter, setActiveFilter] = useState<'all' | 'pending' | 'late' | 'paid'>('all');
+    const [status, setStatus] = useState<'all' | 'pending' | 'late' | 'paid' | 'archived'>('all');
     const [selectedTenant, setSelectedTenant] = useState<number | 'all'>('all');
     const [selectedProperty, setSelectedProperty] = useState<number | 'all'>('all');
-    const [dateRange, setDateRange] = useState<{ start: Date | null; end: Date | null }>({
+    const [dateRange, setDateRange] = useState<{
+        start: Date | null;
+        end: Date | null;
+    }>({
         start: null,
-        end: null
+        end: null,
     });
     const [isUpdatingStatus, setIsUpdatingStatus] = useState(false);
 
-    useEffect(() => {
-        const fetchData = async () => {
-            try {
-                console.log('Début du chargement des données...');
-                const [schedulesResponse, propertiesResponse, tenantsResponse] = await Promise.all([
-                    api.get('/payments/schedules'),
-                    api.get('/properties'),
-                    api.get('/user/role/tenant')
-                ]);
+    const fetchPayments = async () => {
+        try {
+            console.log('Début du chargement des données...');
+            const [schedulesResponse, propertiesResponse, tenantsResponse] = await Promise.all([
+                api.get('/payments/schedules'),
+                api.get('/properties'),
+                api.get('/user/role/tenant')
+            ]);
 
-                // Extraction des paiements depuis les échéanciers
-                const allPayments: Payment[] = [];
-                const schedules = schedulesResponse;
+            // Extraction des paiements depuis les échéanciers
+            const allPayments: Payment[] = [];
+            const schedules = schedulesResponse;
 
-                if (schedules && Array.isArray(schedules)) {
-                    console.log('Nombre d\'échéanciers trouvés:', schedules.length);
+            if (schedules && Array.isArray(schedules)) {
+                console.log('Nombre d\'échéanciers trouvés:', schedules.length);
 
-                    schedules.forEach((schedule: PaymentSchedule) => {
-                        console.log('Traitement de l\'échéancier:', schedule.id);
-                        if (schedule?.payments && Array.isArray(schedule.payments)) {
-                            schedule.payments.forEach((payment: Payment) => {
-                                console.log('Traitement du paiement:', payment.id);
-                                allPayments.push({
-                                    ...payment,
-                                    paymentSchedule: {
-                                        id: schedule.id,
-                                        startDate: schedule.startDate,
-                                        endDate: schedule.endDate,
-                                        monthlyAmount: schedule.monthlyAmount,
-                                        dayOfMonth: schedule.dayOfMonth,
-                                        isActive: schedule.isActive,
-                                        property: schedule.property,
-                                        tenant: schedule.tenant,
-                                        payments: []
-                                    }
-                                });
+                schedules.forEach((schedule: PaymentSchedule) => {
+                    console.log('Traitement de l\'échéancier:', schedule.id);
+                    if (schedule?.payments && Array.isArray(schedule.payments)) {
+                        schedule.payments.forEach((payment: Payment) => {
+                            console.log('Traitement du paiement:', payment.id);
+                            allPayments.push({
+                                ...payment,
+                                paymentSchedule: {
+                                    id: schedule.id,
+                                    startDate: schedule.startDate,
+                                    endDate: schedule.endDate,
+                                    monthlyAmount: schedule.monthlyAmount,
+                                    dayOfMonth: schedule.dayOfMonth,
+                                    isActive: schedule.isActive,
+                                    property: schedule.property,
+                                    tenant: schedule.tenant,
+                                    payments: []
+                                }
                             });
-                        }
-                    });
-                }
-
-                console.log('Nombre total de paiements extraits:', allPayments.length);
-
-                // Tri des paiements par date d'échéance
-                allPayments.sort((a, b) => new Date(a.dueDate).getTime() - new Date(b.dueDate).getTime());
-                setPayments(allPayments);
-
-                if (propertiesResponse) {
-                    setProperties(propertiesResponse);
-                }
-
-                if (tenantsResponse) {
-                    setTenants(tenantsResponse);
-                }
-
-                // Calcul des statistiques
-                const stats: PaymentStatistics = {
-                    totalDue: 0,
-                    totalPaid: 0,
-                    totalPending: 0,
-                    totalLate: 0,
-                    balance: 0
-                };
-
-                allPayments.forEach(payment => {
-                    if (payment?.amount) {
-                        stats.totalDue += payment.amount;
-                        if (payment.status === 'PAID' && payment.paidAmount) {
-                            stats.totalPaid += payment.paidAmount;
-                        } else if (payment.status === 'PENDING') {
-                            stats.totalPending += payment.amount;
-                        } else if (payment.status === 'LATE') {
-                            stats.totalLate += payment.amount;
-                        }
+                        });
                     }
                 });
-
-                stats.balance = stats.totalDue - stats.totalPaid;
-                setStatistics(stats);
-                console.log('Statistiques calculées:', stats);
-            } catch (err) {
-                console.error('Erreur détaillée lors du chargement des données:', err);
-                if (err instanceof Error) {
-                    console.error('Message d\'erreur:', err.message);
-                    console.error('Stack trace:', err.stack);
-                }
-                setError('Une erreur est survenue lors du chargement des données. Veuillez réessayer plus tard.');
-            } finally {
-                setIsLoading(false);
             }
-        };
 
-        fetchData();
+            console.log('Nombre total de paiements extraits:', allPayments.length);
 
-        return () => {
-            setPayments([]);
-            setStatistics(null);
-            setProperties([]);
-            setTenants([]);
-        };
+            // Tri des paiements par date d'échéance
+            allPayments.sort((a, b) => new Date(a.dueDate).getTime() - new Date(b.dueDate).getTime());
+            setPayments(allPayments);
+
+            if (propertiesResponse) {
+                setProperties(propertiesResponse);
+            }
+
+            if (tenantsResponse) {
+                setTenants(tenantsResponse);
+            }
+
+            // Calcul des statistiques
+            const stats: PaymentStatistics = {
+                totalDue: 0,
+                totalPaid: 0,
+                totalPending: 0,
+                totalLate: 0,
+                balance: 0
+            };
+
+            allPayments.forEach(payment => {
+                if (payment?.amount) {
+                    stats.totalDue += payment.amount;
+                    if (payment.status === 'PAID' && payment.paidAmount) {
+                        stats.totalPaid += payment.paidAmount;
+                    } else if (payment.status === 'PENDING') {
+                        stats.totalPending += payment.amount;
+                    } else if (payment.status === 'LATE') {
+                        stats.totalLate += payment.amount;
+                    }
+                }
+            });
+
+            stats.balance = stats.totalDue - stats.totalPaid;
+            setStatistics(stats);
+            console.log('Statistiques calculées:', stats);
+        } catch (error) {
+            console.error('Erreur lors du chargement des données:', error);
+            setError('Une erreur est survenue lors du chargement des données');
+        }
+    };
+
+    useEffect(() => {
+        fetchPayments();
     }, []);
 
     const filterButtons = [
@@ -141,10 +134,10 @@ export default function AccountingPage() {
     // Filtrer les paiements en fonction de tous les filtres
     const filteredPayments = payments.filter(payment => {
         // Filtre par statut
-        if (activeFilter !== 'all') {
-            if (activeFilter === 'paid' && payment.status !== 'PAID') return false;
-            if (activeFilter === 'late' && payment.status !== 'LATE') return false;
-            if (activeFilter === 'pending' && payment.status !== 'PENDING') return false;
+        if (status !== 'all') {
+            if (status === 'paid' && payment.status !== 'PAID') return false;
+            if (status === 'late' && payment.status !== 'LATE') return false;
+            if (status === 'pending' && payment.status !== 'PENDING') return false;
         }
 
         // Filtre par locataire
@@ -224,7 +217,7 @@ export default function AccountingPage() {
                         <div className="flex items-center justify-between">
                             <div>
                                 <p className="text-sm font-medium text-gray-500 dark:text-gray-400">Total dû</p>
-                                <p className="text-2xl font-semibold text-blue-600 dark:text-blue-400">{new Intl.NumberFormat('fr-FR', { style: 'currency', currency: 'EUR' }).format(statistics.totalDue)}</p>
+                                <p className="text-2xl font-semibold text-blue-600 dark:text-blue-400">{formatPrice(statistics.totalDue)}</p>
                             </div>
                             <div className="p-3 bg-blue-50 dark:bg-blue-900/20 rounded-full">
                                 <svg className="w-6 h-6 text-blue-600 dark:text-blue-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -238,7 +231,7 @@ export default function AccountingPage() {
                         <div className="flex items-center justify-between">
                             <div>
                                 <p className="text-sm font-medium text-gray-500 dark:text-gray-400">Total payé</p>
-                                <p className="text-2xl font-semibold text-green-600 dark:text-green-400">{new Intl.NumberFormat('fr-FR', { style: 'currency', currency: 'EUR' }).format(statistics.totalPaid)}</p>
+                                <p className="text-2xl font-semibold text-green-600 dark:text-green-400">{formatPrice(statistics.totalPaid)}</p>
                             </div>
                             <div className="p-3 bg-green-50 dark:bg-green-900/20 rounded-full">
                                 <svg className="w-6 h-6 text-green-600 dark:text-green-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -252,7 +245,7 @@ export default function AccountingPage() {
                         <div className="flex items-center justify-between">
                             <div>
                                 <p className="text-sm font-medium text-gray-500 dark:text-gray-400">En attente</p>
-                                <p className="text-2xl font-semibold text-orange-600 dark:text-orange-400">{new Intl.NumberFormat('fr-FR', { style: 'currency', currency: 'EUR' }).format(statistics.totalPending)}</p>
+                                <p className="text-2xl font-semibold text-orange-600 dark:text-orange-400">{formatPrice(statistics.totalPending)}</p>
                             </div>
                             <div className="p-3 bg-orange-50 dark:bg-orange-900/20 rounded-full">
                                 <svg className="w-6 h-6 text-orange-600 dark:text-orange-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -266,7 +259,7 @@ export default function AccountingPage() {
                         <div className="flex items-center justify-between">
                             <div>
                                 <p className="text-sm font-medium text-gray-500 dark:text-gray-400">En retard</p>
-                                <p className="text-2xl font-semibold text-red-600 dark:text-red-400">{new Intl.NumberFormat('fr-FR', { style: 'currency', currency: 'EUR' }).format(statistics.totalLate)}</p>
+                                <p className="text-2xl font-semibold text-red-600 dark:text-red-400">{formatPrice(statistics.totalLate)}</p>
                             </div>
                             <div className="p-3 bg-red-50 dark:bg-red-900/20 rounded-full">
                                 <svg className="w-6 h-6 text-red-600 dark:text-red-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -279,21 +272,46 @@ export default function AccountingPage() {
             )}
 
             <div className="space-y-4">
-                {/* Filtres de statut existants */}
-                <div className="flex gap-2">
-                    {filterButtons.map((button) => (
-                        <Button
-                            key={button.value}
-                            variant={activeFilter === button.value ? "default" : "outline"}
-                            onClick={() => setActiveFilter(button.value)}
-                            className={activeFilter === button.value ? 'bg-blue-600 hover:bg-blue-700 text-white' : 'hover:bg-gray-100 dark:hover:bg-gray-700'}
-                        >
-                            {button.label}
-                        </Button>
-                    ))}
-                </div>
+                <Tabs
+                    defaultValue="all"
+                    value={status}
+                    onValueChange={(value) => setStatus(value as typeof status)}
+                    className="w-full"
+                >
+                    <TabsList className="grid grid-cols-5 w-full max-w-2xl">
+                        <TabsTrigger value="all" className="flex items-center gap-2">
+                            <span>Tous</span>
+                            <Badge variant="secondary" className="ml-2">
+                                {payments.filter(p => !p.isArchived).length}
+                            </Badge>
+                        </TabsTrigger>
+                        <TabsTrigger value="pending" className="flex items-center gap-2">
+                            <span>En attente</span>
+                            <Badge variant="secondary" className="ml-2">
+                                {payments.filter(p => p.status === 'PENDING' && !p.isArchived).length}
+                            </Badge>
+                        </TabsTrigger>
+                        <TabsTrigger value="late" className="flex items-center gap-2">
+                            <span>En retard</span>
+                            <Badge variant="secondary" className="ml-2">
+                                {payments.filter(p => p.status === 'LATE' && !p.isArchived).length}
+                            </Badge>
+                        </TabsTrigger>
+                        <TabsTrigger value="paid" className="flex items-center gap-2">
+                            <span>Payés</span>
+                            <Badge variant="secondary" className="ml-2">
+                                {payments.filter(p => p.status === 'PAID' && !p.isArchived).length}
+                            </Badge>
+                        </TabsTrigger>
+                        <TabsTrigger value="archived" className="flex items-center gap-2">
+                            <span>Archives</span>
+                            <Badge variant="secondary" className="ml-2">
+                                {payments.filter(p => p.isArchived).length}
+                            </Badge>
+                        </TabsTrigger>
+                    </TabsList>
+                </Tabs>
 
-                {/* Nouveaux filtres */}
                 <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
                     {/* Filtre par locataire */}
                     <select
@@ -341,19 +359,15 @@ export default function AccountingPage() {
                 </div>
             </div>
 
-            {isLoading ? (
-                <div className="flex justify-center items-center h-64">
-                    <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-blue-600"></div>
-                </div>
-            ) : (
-                <PaymentList
-                    payments={payments}
-                    status={activeFilter}
-                    selectedTenant={selectedTenant}
-                    selectedProperty={selectedProperty}
-                    dateRange={dateRange}
-                />
-            )}
+            <PaymentList
+                payments={payments}
+                status={status === 'archived' ? 'all' : status}
+                selectedTenant={selectedTenant}
+                selectedProperty={selectedProperty}
+                dateRange={dateRange}
+                showArchived={status === 'archived'}
+                onPaymentsUpdate={fetchPayments}
+            />
 
             {showCreateModal && (
                 <CreatePaymentScheduleModal

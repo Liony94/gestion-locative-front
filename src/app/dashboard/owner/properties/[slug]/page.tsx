@@ -12,7 +12,7 @@ interface Tenant {
     email: string;
     phone: string;
     address: string;
-    role: string;
+    role: 'OWNER' | 'TENANT' | 'ADMIN';
 }
 
 interface Property {

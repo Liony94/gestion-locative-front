@@ -1,9 +1,11 @@
 'use client';
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import Link from 'next/link';
 import { useRouter, usePathname } from 'next/navigation';
 import { useAuth } from '@/hooks/useAuth';
 import { UserRole } from '@/app/auth/register/page';
+import { useTheme } from 'next-themes';
+import { Moon, Sun } from 'lucide-react';
 
 const ownerNavigation = [
     { name: 'Tableau de bord', href: '/dashboard' },
@@ -21,9 +23,15 @@ const tenantNavigation = [
 
 export default function DashboardHeader() {
     const [isProfileOpen, setIsProfileOpen] = useState(false);
+    const [mounted, setMounted] = useState(false);
     const router = useRouter();
     const pathname = usePathname();
     const { isAuthenticated, role, isLoading, user, logout } = useAuth();
+    const { theme, setTheme } = useTheme();
+
+    useEffect(() => {
+        setMounted(true);
+    }, []);
 
     const navigation = role === UserRole.OWNER ? ownerNavigation : tenantNavigation;
 
@@ -100,11 +108,26 @@ export default function DashboardHeader() {
                         {role === UserRole.OWNER && (
                             <Link
                                 href="/dashboard/owner/properties/new"
-                                className="inline-flex items-center px-4 py-2 border border-transparent text-sm font-medium rounded-lg shadow-sm text-white bg-blue-600 hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500"
+                                className="inline-flex items-center px-4 py-2 border border-transparent text-sm font-medium rounded-lg shadow-sm text-white bg-blue-600 hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500 dark:bg-blue-500 dark:hover:bg-blue-600"
                             >
                                 + Nouveau bien
                             </Link>
                         )}
+
+                        {/* Theme Switcher */}
+                        <button
+                            onClick={() => setTheme(theme === 'dark' ? 'light' : 'dark')}
+                            className="p-2 rounded-lg bg-gray-100 dark:bg-gray-700 hover:bg-gray-200 dark:hover:bg-gray-600 transition-colors duration-200"
+                            aria-label="Toggle theme"
+                        >
+                            {mounted && (
+                                theme === 'dark' ? (
+                                    <Sun className="h-5 w-5 text-gray-600 dark:text-gray-300" />
+                                ) : (
+                                    <Moon className="h-5 w-5 text-gray-600 dark:text-gray-300" />
+                                )
+                            )}
+                        </button>
 
                         {/* Notifications */}
                         <button className="p-2 text-gray-400 hover:text-gray-500 dark:hover:text-gray-300">

@@ -5,6 +5,8 @@ import { usePathname } from 'next/navigation';
 import { Geist, Geist_Mono } from "next/font/google";
 import DashboardHeader from './dashboard/components/DashboardHeader';
 import "./globals.css";
+import { ThemeProvider } from '@/providers/ThemeProvider';
+import { Toaster } from 'sonner';
 
 const geistSans = Geist({
   variable: "--font-geist-sans",
@@ -25,14 +27,32 @@ export default function RootLayout({ children }: RootLayoutProps) {
   const isDashboard = pathname?.startsWith('/dashboard');
 
   return (
-    <html lang="fr" className="h-full">
+    <html lang="fr" className="h-full" suppressHydrationWarning>
       <body className={`${geistSans.variable} ${geistMono.variable} antialiased h-full`}>
-        <div className="min-h-screen bg-gray-50 dark:bg-gray-900">
-          {isDashboard && <DashboardHeader />}
-          <main className={isDashboard ? 'pt-4' : ''}>
-            {children}
-          </main>
-        </div>
+        <ThemeProvider
+          attribute="class"
+          defaultTheme="system"
+          enableSystem
+          disableTransitionOnChange
+        >
+          <div className="min-h-screen bg-gray-50 dark:bg-gray-900">
+            {isDashboard && <DashboardHeader />}
+            <main className={isDashboard ? 'pt-4' : ''}>
+              {children}
+            </main>
+          </div>
+          <Toaster
+            position="top-right"
+            toastOptions={{
+              style: {
+                background: 'var(--background)',
+                color: 'var(--foreground)',
+                border: '1px solid var(--border)',
+              },
+              className: 'dark:bg-gray-800 dark:text-gray-100 dark:border-gray-700',
+            }}
+          />
+        </ThemeProvider>
       </body>
     </html>
   );

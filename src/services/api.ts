@@ -28,10 +28,54 @@ interface LoginResponse {
     };
 }
 
+const getAuthToken = () => {
+    if (typeof window !== 'undefined') {
+        return localStorage.getItem('token');
+    }
+    return null;
+};
+
+export const api = {
+    get: async (endpoint: string) => {
+        const token = getAuthToken();
+        const response = await fetch(`${API_URL}/api${endpoint}`, {
+            headers: {
+                'Authorization': `Bearer ${token}`,
+                'Content-Type': 'application/json',
+            },
+        });
+
+        if (!response.ok) {
+            const error = await response.json();
+            throw new Error(error.message || 'Une erreur est survenue');
+        }
+
+        return response.json();
+    },
+
+    post: async (endpoint: string, data: any) => {
+        const token = getAuthToken();
+        const response = await fetch(`${API_URL}/api${endpoint}`, {
+            method: 'POST',
+            headers: {
+                'Authorization': `Bearer ${token}`,
+                'Content-Type': 'application/json',
+            },
+            body: JSON.stringify(data),
+        });
+
+        if (!response.ok) {
+            const error = await response.json();
+            throw new Error(error.message || 'Une erreur est survenue');
+        }
+
+        return response.json();
+    },
+};
+
 export const authApi = {
     login: async (credentials: { email: string; password: string; role: UserRole }) => {
         try {
-
             const response = await fetch(`${API_URL}/api/auth/login`, {
                 method: 'POST',
                 headers: {

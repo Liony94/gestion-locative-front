@@ -3,6 +3,7 @@
 import { useState, useEffect } from 'react';
 import { useParams } from 'next/navigation';
 import Link from 'next/link';
+import TenantDetailsModal from '../components/TenantDetailsModal';
 
 interface Tenant {
     id: number;
@@ -43,6 +44,8 @@ export default function PropertyDetailsPage() {
     const [property, setProperty] = useState<Property | null>(null);
     const [loading, setLoading] = useState(true);
     const [error, setError] = useState<string | null>(null);
+    const [selectedTenant, setSelectedTenant] = useState<Tenant | null>(null);
+    const [isModalOpen, setIsModalOpen] = useState(false);
 
     useEffect(() => {
         const fetchPropertyDetails = async () => {
@@ -135,6 +138,16 @@ export default function PropertyDetailsPage() {
                 }
             })
             .catch(error => console.error('Erreur réseau:', error));
+    };
+
+    const handleOpenTenantDetails = (tenant: Tenant) => {
+        setSelectedTenant(tenant);
+        setIsModalOpen(true);
+    };
+
+    const handleCloseModal = () => {
+        setIsModalOpen(false);
+        setSelectedTenant(null);
     };
 
     return (
@@ -258,12 +271,12 @@ export default function PropertyDetailsPage() {
                                                 {tenant.email}
                                             </p>
                                         </div>
-                                        <Link
-                                            href={`/dashboard/owner/tenants/${tenant.id}`}
-                                            className="text-xs text-blue-600 dark:text-blue-400 hover:text-blue-800 dark:hover:text-blue-300"
+                                        <button
+                                            onClick={() => handleOpenTenantDetails(tenant)}
+                                            className="text-sm text-blue-600 dark:text-blue-400 hover:text-blue-800 dark:hover:text-blue-300"
                                         >
                                             Voir détails
-                                        </Link>
+                                        </button>
                                     </div>
                                 </div>
                             ))}
@@ -291,6 +304,12 @@ export default function PropertyDetailsPage() {
                     Supprimer
                 </button>
             </div>
+
+            <TenantDetailsModal
+                isOpen={isModalOpen}
+                onClose={handleCloseModal}
+                tenant={selectedTenant}
+            />
         </div>
     );
 }

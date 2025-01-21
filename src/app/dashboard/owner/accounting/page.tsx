@@ -346,7 +346,13 @@ export default function AccountingPage() {
                     <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-blue-600"></div>
                 </div>
             ) : (
-                <PaymentList payments={payments} status={activeFilter} />
+                <PaymentList
+                    payments={payments}
+                    status={activeFilter}
+                    selectedTenant={selectedTenant}
+                    selectedProperty={selectedProperty}
+                    dateRange={dateRange}
+                />
             )}
 
             {showCreateModal && (

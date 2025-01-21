@@ -22,9 +22,21 @@ import PaymentDetailsModal from './PaymentDetailsModal';
 interface PaymentListProps {
     payments: Payment[];
     status: 'all' | 'pending' | 'late' | 'paid';
+    selectedTenant?: number | 'all';
+    selectedProperty?: number | 'all';
+    dateRange?: {
+        start: Date | null;
+        end: Date | null;
+    };
 }
 
-export default function PaymentList({ payments, status }: PaymentListProps) {
+export default function PaymentList({
+    payments,
+    status,
+    selectedTenant = 'all',
+    selectedProperty = 'all',
+    dateRange
+}: PaymentListProps) {
     const [selectedPayment, setSelectedPayment] = useState<Payment | null>(null);
     const [showRecordModal, setShowRecordModal] = useState(false);
     const [isClient, setIsClient] = useState(false);
@@ -105,34 +117,35 @@ export default function PaymentList({ payments, status }: PaymentListProps) {
         );
     }
 
-    // Filtrer les paiements selon le statut sélectionné
-    console.log('Status actuel:', status);
-    console.log('Paiements avant filtrage:', payments.map(p => ({
-        id: p.id,
-        status: p.status,
-        dueDate: p.dueDate
-    })));
-
+    // Filtrer les paiements selon tous les critères
     const filteredPayments = payments.filter(payment => {
-        if (status === 'all') return true;
-        if (status === 'paid') return payment.status === 'PAID';
-        if (status === 'late') {
-            console.log('Vérification paiement en retard:', {
-                id: payment.id,
-                status: payment.status,
-                isLate: payment.status === 'LATE'
-            });
-            return payment.status === 'LATE';
+        // Filtre par statut
+        if (status !== 'all') {
+            if (status === 'paid' && payment.status !== 'PAID') return false;
+            if (status === 'late' && payment.status !== 'LATE') return false;
+            if (status === 'pending' && payment.status !== 'PENDING') return false;
         }
-        if (status === 'pending') return payment.status === 'PENDING';
+
+        // Filtre par locataire
+        if (selectedTenant !== 'all' && payment.paymentSchedule?.tenant?.id !== selectedTenant) {
+            return false;
+        }
+
+        // Filtre par propriété
+        if (selectedProperty !== 'all' && payment.paymentSchedule?.property?.id !== selectedProperty) {
+            return false;
+        }
+
+        // Filtre par date
+        if (dateRange?.start && new Date(payment.dueDate) < dateRange.start) {
+            return false;
+        }
+        if (dateRange?.end && new Date(payment.dueDate) > dateRange.end) {
+            return false;
+        }
+
         return true;
     });
-
-    console.log('Paiements après filtrage:', filteredPayments.map(p => ({
-        id: p.id,
-        status: p.status,
-        dueDate: p.dueDate
-    })));
 
     if (filteredPayments.length === 0) {
         return (

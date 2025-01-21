@@ -8,7 +8,7 @@ import { api } from '@/services/api';
 import PaymentList from './components/PaymentList';
 import { PaymentStatisticsCard } from './components/PaymentStatisticsCard';
 import { Button } from '@/components/ui/button';
-import { Plus, RotateCw } from 'lucide-react';
+import { Plus, RotateCw, Users, Home, Calendar } from 'lucide-react';
 import CreatePaymentScheduleModal from './components/CreatePaymentScheduleModal';
 import { toast } from 'sonner';
 import { Tabs, TabsList, TabsTrigger } from '@/components/ui/tabs';
@@ -278,34 +278,64 @@ export default function AccountingPage() {
                     onValueChange={(value) => setStatus(value as typeof status)}
                     className="w-full"
                 >
-                    <TabsList className="grid grid-cols-5 w-full max-w-2xl">
-                        <TabsTrigger value="all" className="flex items-center gap-2">
+                    <TabsList className="grid grid-cols-5 w-full max-w-4xl bg-gray-100/50 dark:bg-gray-800/50 p-1 rounded-xl">
+                        <TabsTrigger
+                            value="all"
+                            className="flex items-center gap-2 data-[state=active]:bg-white dark:data-[state=active]:bg-gray-700 
+                                data-[state=active]:text-primary dark:data-[state=active]:text-primary-foreground
+                                data-[state=active]:shadow-sm rounded-lg transition-all duration-200
+                                hover:bg-white/50 dark:hover:bg-gray-700/50"
+                        >
                             <span>Tous</span>
-                            <Badge variant="secondary" className="ml-2">
+                            <Badge variant="secondary" className="bg-gray-200 dark:bg-gray-600">
                                 {payments.filter(p => !p.isArchived).length}
                             </Badge>
                         </TabsTrigger>
-                        <TabsTrigger value="pending" className="flex items-center gap-2">
+                        <TabsTrigger
+                            value="pending"
+                            className="flex items-center gap-2 data-[state=active]:bg-white dark:data-[state=active]:bg-gray-700 
+                                data-[state=active]:text-primary dark:data-[state=active]:text-primary-foreground
+                                data-[state=active]:shadow-sm rounded-lg transition-all duration-200
+                                hover:bg-white/50 dark:hover:bg-gray-700/50"
+                        >
                             <span>En attente</span>
-                            <Badge variant="secondary" className="ml-2">
+                            <Badge variant="secondary" className="bg-orange-100 text-orange-700 dark:bg-orange-900/30 dark:text-orange-400">
                                 {payments.filter(p => p.status === 'PENDING' && !p.isArchived).length}
                             </Badge>
                         </TabsTrigger>
-                        <TabsTrigger value="late" className="flex items-center gap-2">
+                        <TabsTrigger
+                            value="late"
+                            className="flex items-center gap-2 data-[state=active]:bg-white dark:data-[state=active]:bg-gray-700 
+                                data-[state=active]:text-primary dark:data-[state=active]:text-primary-foreground
+                                data-[state=active]:shadow-sm rounded-lg transition-all duration-200
+                                hover:bg-white/50 dark:hover:bg-gray-700/50"
+                        >
                             <span>En retard</span>
-                            <Badge variant="secondary" className="ml-2">
+                            <Badge variant="secondary" className="bg-red-100 text-red-700 dark:bg-red-900/30 dark:text-red-400">
                                 {payments.filter(p => p.status === 'LATE' && !p.isArchived).length}
                             </Badge>
                         </TabsTrigger>
-                        <TabsTrigger value="paid" className="flex items-center gap-2">
+                        <TabsTrigger
+                            value="paid"
+                            className="flex items-center gap-2 data-[state=active]:bg-white dark:data-[state=active]:bg-gray-700 
+                                data-[state=active]:text-primary dark:data-[state=active]:text-primary-foreground
+                                data-[state=active]:shadow-sm rounded-lg transition-all duration-200
+                                hover:bg-white/50 dark:hover:bg-gray-700/50"
+                        >
                             <span>Payés</span>
-                            <Badge variant="secondary" className="ml-2">
+                            <Badge variant="secondary" className="bg-green-100 text-green-700 dark:bg-green-900/30 dark:text-green-400">
                                 {payments.filter(p => p.status === 'PAID' && !p.isArchived).length}
                             </Badge>
                         </TabsTrigger>
-                        <TabsTrigger value="archived" className="flex items-center gap-2">
+                        <TabsTrigger
+                            value="archived"
+                            className="flex items-center gap-2 data-[state=active]:bg-white dark:data-[state=active]:bg-gray-700 
+                                data-[state=active]:text-primary dark:data-[state=active]:text-primary-foreground
+                                data-[state=active]:shadow-sm rounded-lg transition-all duration-200
+                                hover:bg-white/50 dark:hover:bg-gray-700/50"
+                        >
                             <span>Archives</span>
-                            <Badge variant="secondary" className="ml-2">
+                            <Badge variant="secondary" className="bg-gray-200 dark:bg-gray-600">
                                 {payments.filter(p => p.isArchived).length}
                             </Badge>
                         </TabsTrigger>
@@ -314,47 +344,79 @@ export default function AccountingPage() {
 
                 <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
                     {/* Filtre par locataire */}
-                    <select
-                        value={selectedTenant}
-                        onChange={(e) => setSelectedTenant(e.target.value === 'all' ? 'all' : Number(e.target.value))}
-                        className="rounded-md border border-gray-200 dark:border-gray-700 bg-white dark:bg-gray-800 px-3 py-2 text-sm"
-                    >
-                        <option value="all">Tous les locataires</option>
-                        {tenants.map((tenant) => (
-                            <option key={tenant.id} value={tenant.id}>
-                                {tenant.firstName} {tenant.lastName}
-                            </option>
-                        ))}
-                    </select>
+                    <div className="relative">
+                        <Users className="absolute left-3 top-1/2 transform -translate-y-1/2 h-4 w-4 text-gray-400" />
+                        <select
+                            value={selectedTenant}
+                            onChange={(e) => setSelectedTenant(e.target.value === 'all' ? 'all' : Number(e.target.value))}
+                            className="w-full h-10 pl-10 rounded-lg border border-gray-200 dark:border-gray-700 bg-white dark:bg-gray-800 pr-3 text-sm 
+                                focus:outline-none focus:ring-2 focus:ring-primary/20 focus:border-primary
+                                transition-all duration-200
+                                hover:border-primary/50 dark:hover:border-primary/50
+                                text-gray-600 dark:text-gray-300
+                                shadow-sm hover:shadow-md"
+                        >
+                            <option value="all">Tous les locataires</option>
+                            {tenants.map((tenant) => (
+                                <option key={tenant.id} value={tenant.id}>
+                                    {tenant.firstName} {tenant.lastName}
+                                </option>
+                            ))}
+                        </select>
+                    </div>
 
                     {/* Filtre par propriété */}
-                    <select
-                        value={selectedProperty}
-                        onChange={(e) => setSelectedProperty(e.target.value === 'all' ? 'all' : Number(e.target.value))}
-                        className="rounded-md border border-gray-200 dark:border-gray-700 bg-white dark:bg-gray-800 px-3 py-2 text-sm"
-                    >
-                        <option value="all">Toutes les propriétés</option>
-                        {properties.map((property) => (
-                            <option key={property.id} value={property.id}>
-                                {property.title}
-                            </option>
-                        ))}
-                    </select>
+                    <div className="relative">
+                        <Home className="absolute left-3 top-1/2 transform -translate-y-1/2 h-4 w-4 text-gray-400" />
+                        <select
+                            value={selectedProperty}
+                            onChange={(e) => setSelectedProperty(e.target.value === 'all' ? 'all' : Number(e.target.value))}
+                            className="w-full h-10 pl-10 rounded-lg border border-gray-200 dark:border-gray-700 bg-white dark:bg-gray-800 pr-3 text-sm 
+                                focus:outline-none focus:ring-2 focus:ring-primary/20 focus:border-primary
+                                transition-all duration-200
+                                hover:border-primary/50 dark:hover:border-primary/50
+                                text-gray-600 dark:text-gray-300
+                                shadow-sm hover:shadow-md"
+                        >
+                            <option value="all">Toutes les propriétés</option>
+                            {properties.map((property) => (
+                                <option key={property.id} value={property.id}>
+                                    {property.title}
+                                </option>
+                            ))}
+                        </select>
+                    </div>
 
                     {/* Filtre par date */}
                     <div className="flex gap-2">
-                        <input
-                            type="date"
-                            value={dateRange.start ? dateRange.start.toISOString().split('T')[0] : ''}
-                            onChange={(e) => setDateRange(prev => ({ ...prev, start: e.target.value ? new Date(e.target.value) : null }))}
-                            className="rounded-md border border-gray-200 dark:border-gray-700 bg-white dark:bg-gray-800 px-3 py-2 text-sm"
-                        />
-                        <input
-                            type="date"
-                            value={dateRange.end ? dateRange.end.toISOString().split('T')[0] : ''}
-                            onChange={(e) => setDateRange(prev => ({ ...prev, end: e.target.value ? new Date(e.target.value) : null }))}
-                            className="rounded-md border border-gray-200 dark:border-gray-700 bg-white dark:bg-gray-800 px-3 py-2 text-sm"
-                        />
+                        <div className="relative flex-1">
+                            <Calendar className="absolute left-3 top-1/2 transform -translate-y-1/2 h-4 w-4 text-gray-400" />
+                            <input
+                                type="date"
+                                value={dateRange.start ? dateRange.start.toISOString().split('T')[0] : ''}
+                                onChange={(e) => setDateRange(prev => ({ ...prev, start: e.target.value ? new Date(e.target.value) : null }))}
+                                className="w-full h-10 pl-10 rounded-lg border border-gray-200 dark:border-gray-700 bg-white dark:bg-gray-800 pr-3 text-sm 
+                                    focus:outline-none focus:ring-2 focus:ring-primary/20 focus:border-primary
+                                    transition-all duration-200
+                                    hover:border-primary/50 dark:hover:border-primary/50
+                                    text-gray-600 dark:text-gray-300
+                                    shadow-sm hover:shadow-md"
+                            />
+                        </div>
+                        <div className="relative flex-1">
+                            <Calendar className="absolute left-3 top-1/2 transform -translate-y-1/2 h-4 w-4 text-gray-400" />
+                            <input
+                                type="date"
+                                value={dateRange.end ? dateRange.end.toISOString().split('T')[0] : ''}
+                                onChange={(e) => setDateRange(prev => ({ ...prev, end: e.target.value ? new Date(e.target.value) : null }))}
+                                className="w-full h-10 pl-10 rounded-lg border border-gray-200 dark:border-gray-700 bg-white dark:bg-gray-800 pr-3 text-sm 
+                                    focus:outline-none focus:ring-2 focus:ring-primary/20 focus:border-primary
+                                    transition-all duration-200
+                                    hover:border-primary/50 dark:hover:border-primary/50
+                                    text-gray-600 dark:text-gray-300
+                                    shadow-sm hover:shadow-md"
+                            />
+                        </div>
                     </div>
                 </div>
             </div>

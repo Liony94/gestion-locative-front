@@ -119,7 +119,7 @@ export default function PropertyList() {
                     Mes Propriétés
                 </h2>
                 <Link
-                    href="/dashboard/properties"
+                    href="/dashboard/owner/properties"
                     className="text-sm text-blue-600 dark:text-blue-400 hover:text-blue-700 dark:hover:text-blue-300"
                 >
                     Voir tout →
@@ -184,9 +184,12 @@ export default function PropertyList() {
 
                             {/* Actions rapides */}
                             <div className="mt-4 flex space-x-3 opacity-0 group-hover:opacity-100 transition-opacity duration-300">
-                                <button className="inline-flex items-center px-3 py-1 border border-transparent text-sm font-medium rounded-md text-blue-700 bg-blue-100 hover:bg-blue-200 dark:text-blue-400 dark:bg-blue-900/50 dark:hover:bg-blue-900">
+                                <Link
+                                    href={`/dashboard/owner/properties/${property.id}`}
+                                    className="inline-flex items-center px-3 py-1 border border-transparent text-sm font-medium rounded-md text-blue-700 bg-blue-100 hover:bg-blue-200 dark:text-blue-400 dark:bg-blue-900/50 dark:hover:bg-blue-900"
+                                >
                                     Détails
-                                </button>
+                                </Link>
                                 <button className="inline-flex items-center px-3 py-1 border border-transparent text-sm font-medium rounded-md text-orange-700 bg-orange-100 hover:bg-orange-200 dark:text-orange-400 dark:bg-orange-900/50 dark:hover:bg-orange-900">
                                     Modifier
                                 </button>

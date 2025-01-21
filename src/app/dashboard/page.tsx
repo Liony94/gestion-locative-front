@@ -7,13 +7,44 @@ import PaymentOverview from './components/PaymentOverview';
 import { useAuth } from '@/hooks/useAuth';
 import { UserRole } from '@/app/auth/register/page';
 import { RouteGuard } from '@/components/RouteGuard';
+import { useState, useEffect } from 'react';
+import { api } from '@/services/api';
+import { Payment } from '@/types/payment';
 
 export default function OwnerDashboard() {
     const { isAuthenticated, role, isLoading } = useAuth();
+    const [payments, setPayments] = useState<Payment[]>([]);
+    const [isLoadingPayments, setIsLoadingPayments] = useState(true);
 
-    // console.log('OwnerDashboard - État:', { isAuthenticated, role, isLoading });
+    useEffect(() => {
+        const fetchPayments = async () => {
+            try {
+                const response = await api.get('/payments/schedules');
+                const schedules = response;
+                const allPayments: Payment[] = [];
 
-    if (isLoading) {
+                if (Array.isArray(schedules)) {
+                    schedules.forEach((schedule: any) => {
+                        if (schedule.payments) {
+                            allPayments.push(...schedule.payments);
+                        }
+                    });
+                }
+
+                setPayments(allPayments);
+            } catch (error) {
+                console.error('Erreur lors du chargement des paiements:', error);
+            } finally {
+                setIsLoadingPayments(false);
+            }
+        };
+
+        if (isAuthenticated) {
+            fetchPayments();
+        }
+    }, [isAuthenticated]);
+
+    if (isLoading || isLoadingPayments) {
         return (
             <div className="min-h-screen bg-gray-50 dark:bg-gray-900 flex items-center justify-center">
                 <div className="animate-spin rounded-full h-32 w-32 border-b-2 border-blue-500"></div>
@@ -26,7 +57,7 @@ export default function OwnerDashboard() {
             <div className="min-h-screen bg-gray-50 dark:bg-gray-900">
                 <main className="container mx-auto px-4 py-8">
                     {/* Statistiques principales */}
-                    <DashboardStats />
+                    <DashboardStats payments={payments} />
 
                     {/* Grille principale */}
                     <div className="grid grid-cols-1 lg:grid-cols-3 gap-8 mt-8">

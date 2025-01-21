@@ -5,6 +5,7 @@ import { useRouter, useSearchParams } from 'next/navigation';
 import { authApi } from '@/services/api';
 import { UserRole } from '../register/page';
 import { jwtDecode } from 'jwt-decode';
+import { useAuth } from '@/hooks/useAuth';
 
 interface JwtPayload {
     email: string;
@@ -15,9 +16,11 @@ interface JwtPayload {
 export default function LoginPage() {
     const router = useRouter();
     const searchParams = useSearchParams();
+    const { login } = useAuth();
     const [formData, setFormData] = useState({
         email: '',
         password: '',
+        role: UserRole.TENANT
     });
     const [error, setError] = useState('');
     const [isLoading, setIsLoading] = useState(false);
@@ -29,21 +32,12 @@ export default function LoginPage() {
 
         try {
             const data = await authApi.login(formData);
-            localStorage.setItem('token', data.access_token);
+            login(data.access_token);
 
-            // Décoder le token pour obtenir les informations de l'utilisateur
             const decodedToken = jwtDecode<JwtPayload>(data.access_token);
-            console.log('Token décodé:', decodedToken);
-            console.log('Role dans le token:', decodedToken.role);
-            console.log('UserRole.TENANT:', UserRole.TENANT);
-            console.log('Comparaison:', decodedToken.role === UserRole.TENANT);
-
-            // Redirection en fonction du rôle
-            if (decodedToken.role.toLowerCase() === UserRole.TENANT) {
-                console.log('Redirection vers le dashboard locataire');
+            if (decodedToken.role.toLowerCase() === UserRole.TENANT.toLowerCase()) {
                 router.push('/dashboard/tenant');
-            } else {
-                console.log('Redirection vers le dashboard propriétaire');
+            } else if (decodedToken.role.toLowerCase() === UserRole.OWNER.toLowerCase()) {
                 router.push('/dashboard');
             }
         } catch (err) {
@@ -77,6 +71,21 @@ export default function LoginPage() {
 
                 <form className="mt-8 space-y-6" onSubmit={handleSubmit}>
                     <div className="space-y-4">
+                        <div>
+                            <label htmlFor="role" className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
+                                Je suis
+                            </label>
+                            <select
+                                id="role"
+                                name="role"
+                                value={formData.role}
+                                onChange={(e) => setFormData({ ...formData, role: e.target.value as UserRole })}
+                                className="appearance-none relative block w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-lg text-gray-900 dark:text-white bg-white dark:bg-gray-700 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500 sm:text-sm"
+                            >
+                                <option value={UserRole.TENANT}>Locataire</option>
+                                <option value={UserRole.OWNER}>Propriétaire</option>
+                            </select>
+                        </div>
                         <div>
                             <label htmlFor="email" className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
                                 Email

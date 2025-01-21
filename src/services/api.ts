@@ -1,3 +1,5 @@
+import { UserRole } from "@/app/auth/register/page";
+
 const API_URL = process.env.NEXT_PUBLIC_BACKEND_URL;
 
 interface LoginData {
@@ -27,30 +29,51 @@ interface LoginResponse {
 }
 
 export const authApi = {
-    login: async (data: LoginData): Promise<LoginResponse> => {
-        const response = await fetch(`${API_URL}/api/auth/login`, {
-            method: 'POST',
-            headers: {
-                'Content-Type': 'application/json',
-            },
-            body: JSON.stringify(data),
-        });
+    login: async (credentials: { email: string; password: string; role: UserRole }) => {
+        try {
 
-        if (!response.ok) {
-            const error = await response.json();
-            throw new Error(error.message || 'Erreur lors de la connexion');
+            const response = await fetch(`${API_URL}/api/auth/login`, {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                },
+                body: JSON.stringify({
+                    email: credentials.email,
+                    password: credentials.password,
+                    role: credentials.role
+                }),
+            });
+
+            if (!response.ok) {
+                const error = await response.json();
+                throw new Error(error.message || 'Erreur lors de la connexion');
+            }
+
+            const data = await response.json();
+            return data;
+        } catch (error) {
+            console.error('Erreur de connexion:', error);
+            if (error instanceof Error) {
+                throw error;
+            }
+            throw new Error('Erreur lors de la connexion');
         }
-
-        return response.json();
     },
 
     register: async (data: RegisterData) => {
+        const normalizedData = {
+            ...data,
+            role: data.role === UserRole.OWNER ? UserRole.OWNER : UserRole.TENANT
+        };
+
+        console.log('Données d\'inscription:', normalizedData);
+
         const response = await fetch(`${API_URL}/api/auth/register`, {
             method: 'POST',
             headers: {
                 'Content-Type': 'application/json',
             },
-            body: JSON.stringify(data),
+            body: JSON.stringify(normalizedData),
         });
 
         if (!response.ok) {

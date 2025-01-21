@@ -40,7 +40,9 @@ export const usePropertyForm = () => {
 
         try {
             const token = localStorage.getItem('token');
-            const response = await fetch(`${process.env.NEXT_PUBLIC_BACKEND_URL}/api/properties/new`, {
+
+            // Créer la propriété
+            const createResponse = await fetch(`${process.env.NEXT_PUBLIC_BACKEND_URL}/api/properties/new`, {
                 method: 'POST',
                 headers: {
                     'Content-Type': 'application/json',
@@ -49,17 +51,35 @@ export const usePropertyForm = () => {
                 body: JSON.stringify(formData)
             });
 
-            if (response.ok) {
-                setSuccess(true);
-                setTimeout(() => {
-                    router.push('/dashboard/properties');
-                }, 2000);
-            } else {
-                const data = await response.json();
-                setError(data.message || 'Une erreur est survenue lors de la création du bien');
+            if (!createResponse.ok) {
+                const data = await createResponse.json();
+                throw new Error(data.message || 'Erreur lors de la création du bien');
             }
+
+            const property = await createResponse.json();
+
+            // Ajouter les locataires si présents
+            if (formData.users.length > 0) {
+                const addTenantsResponse = await fetch(`${process.env.NEXT_PUBLIC_BACKEND_URL}/api/properties/${property.id}/tenants`, {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                        'Authorization': `Bearer ${token}`
+                    },
+                    body: JSON.stringify({ tenantIds: formData.users })
+                });
+
+                if (!addTenantsResponse.ok) {
+                    throw new Error('Erreur lors de l\'ajout des locataires');
+                }
+            }
+
+            setSuccess(true);
+            setTimeout(() => {
+                router.push('/dashboard/owner/properties');
+            }, 2000);
         } catch (err) {
-            setError('Une erreur est survenue lors de la communication avec le serveur');
+            setError(err instanceof Error ? err.message : 'Une erreur est survenue lors de la communication avec le serveur');
         } finally {
             setLoading(false);
         }

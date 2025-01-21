@@ -51,7 +51,8 @@ export default function RegisterPage() {
 
         try {
             const { confirmPassword, ...registerData } = formData;
-            const response = await authApi.register(registerData);
+            console.log('Envoi du formulaire avec:', registerData);
+            await authApi.register(registerData);
 
             // Redirection en fonction du rôle
             if (formData.role === UserRole.TENANT) {
@@ -143,12 +144,16 @@ export default function RegisterPage() {
                                     handleInputChange('role', UserRole.OWNER);
                                     nextStep();
                                 }}
-                                className={`p-6 border rounded-xl text-center hover:border-blue-500 transition-all ${formData.role === UserRole.OWNER ? 'border-blue-500 bg-blue-50 dark:bg-blue-900/30' : 'border-gray-200 dark:border-gray-700'
+                                className={`p-6 border rounded-xl text-center hover:border-blue-500 transition-all ${formData.role === UserRole.OWNER
+                                    ? 'border-blue-500 bg-blue-50 dark:bg-blue-900/30'
+                                    : 'border-gray-200 dark:border-gray-700'
                                     }`}
                             >
                                 <div className="text-3xl mb-2">🏠</div>
                                 <h4 className="text-lg font-medium">Propriétaire</h4>
-                                <p className="text-sm text-gray-600 dark:text-gray-400">Je souhaite gérer mes biens immobiliers</p>
+                                <p className="text-sm text-gray-600 dark:text-gray-400">
+                                    Je souhaite gérer mes biens immobiliers
+                                </p>
                             </button>
                             <button
                                 type="button"
@@ -156,12 +161,16 @@ export default function RegisterPage() {
                                     handleInputChange('role', UserRole.TENANT);
                                     nextStep();
                                 }}
-                                className={`p-6 border rounded-xl text-center hover:border-blue-500 transition-all ${formData.role === UserRole.TENANT ? 'border-blue-500 bg-blue-50 dark:bg-blue-900/30' : 'border-gray-200 dark:border-gray-700'
+                                className={`p-6 border rounded-xl text-center hover:border-blue-500 transition-all ${formData.role === UserRole.TENANT
+                                    ? 'border-blue-500 bg-blue-50 dark:bg-blue-900/30'
+                                    : 'border-gray-200 dark:border-gray-700'
                                     }`}
                             >
                                 <div className="text-3xl mb-2">👥</div>
                                 <h4 className="text-lg font-medium">Locataire</h4>
-                                <p className="text-sm text-gray-600 dark:text-gray-400">Je suis locataire d'un bien</p>
+                                <p className="text-sm text-gray-600 dark:text-gray-400">
+                                    Je suis locataire d'un bien
+                                </p>
                             </button>
                         </div>
                     </div>

@@ -17,7 +17,11 @@ export default function NewPropertyPage() {
         setCurrentStep,
         handleChange,
         handleSubmit,
-        updateUsers
+        updateUsers,
+        handleImageChange,
+        previewUrls,
+        cleanup,
+        removeImage
     } = usePropertyForm();
 
     const {
@@ -82,6 +86,9 @@ export default function NewPropertyPage() {
                         <PropertyForm
                             formData={formData}
                             onChange={handleChange}
+                            onImageChange={handleImageChange}
+                            previewUrls={previewUrls}
+                            onRemoveImage={removeImage}
                         />
                     ) : (
                         <TenantSelector

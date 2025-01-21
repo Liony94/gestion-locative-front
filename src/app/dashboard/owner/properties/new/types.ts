@@ -15,6 +15,8 @@ export interface PropertyFormData {
     type: string;
     surface: number;
     users: number[];
+    images: string[];
+    [key: string]: string | number | number[] | string[];
 }
 
 export const propertyTypes = [

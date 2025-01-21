@@ -13,7 +13,7 @@ interface Property {
     zipCode: string;
     type: string;
     surface: number;
-    image: string;
+    images: string[];
 }
 
 export default function PropertyList() {
@@ -51,6 +51,41 @@ export default function PropertyList() {
 
     // Image par défaut si aucune image n'est fournie
     const defaultImage = 'https://images.unsplash.com/photo-1518780664697-55e3ad937233?ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D&auto=format&fit=crop&w=2340&q=80';
+
+    const getMainImage = (property: Property) => {
+        if (!property.images || property.images.length === 0) {
+            console.log('Pas d\'images disponibles');
+            return defaultImage;
+        }
+
+        const firstImage = property.images[0];
+        console.log('URL stockée:', firstImage);
+
+        // Si l'URL est déjà complète (commence par http ou https)
+        if (firstImage.startsWith('http')) {
+            console.log('URL complète:', firstImage);
+            return firstImage;
+        }
+
+        // Construction de l'URL finale
+        const finalUrl = `${process.env.NEXT_PUBLIC_BACKEND_URL}${firstImage}`;
+        console.log('URL finale:', finalUrl, 'BACKEND_URL:', process.env.NEXT_PUBLIC_BACKEND_URL);
+        return finalUrl;
+    };
+
+    const handleImageError = (e: React.SyntheticEvent<HTMLImageElement, Event>) => {
+        const target = e.target as HTMLImageElement;
+        console.error('Erreur de chargement de l\'image:', target.src);
+        target.src = defaultImage;
+        // Essayons de charger l'image directement pour voir l'erreur
+        fetch(target.src)
+            .then(response => {
+                if (!response.ok) {
+                    console.error('Erreur de chargement:', response.status, response.statusText);
+                }
+            })
+            .catch(error => console.error('Erreur réseau:', error));
+    };
 
     if (loading) {
         return (
@@ -115,13 +150,10 @@ export default function PropertyList() {
                                 <div className="flex-shrink-0">
                                     <div className="relative h-24 w-24 rounded-lg overflow-hidden">
                                         <img
-                                            src={property.image || defaultImage}
+                                            src={getMainImage(property)}
                                             alt={property.title}
                                             className="h-full w-full object-cover transform group-hover:scale-110 transition-transform duration-300"
-                                            onError={(e) => {
-                                                const target = e.target as HTMLImageElement;
-                                                target.src = defaultImage;
-                                            }}
+                                            onError={handleImageError}
                                         />
                                     </div>
                                 </div>

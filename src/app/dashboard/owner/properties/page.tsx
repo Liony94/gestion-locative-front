@@ -15,6 +15,7 @@ interface Property {
     type: string;
     surface: number;
     image: string;
+    images: string[];
 }
 
 export default function PropertiesPage() {

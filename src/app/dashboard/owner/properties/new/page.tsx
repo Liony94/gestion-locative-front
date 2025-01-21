@@ -5,9 +5,16 @@ import { PropertyForm } from './components/PropertyForm';
 import { TenantSelector } from './components/TenantSelector';
 import { usePropertyForm } from './hooks/usePropertyForm';
 import { useTenants } from './hooks/useTenants';
+import CreatePaymentScheduleModal from '../../accounting/components/CreatePaymentScheduleModal';
+import { useState, useEffect } from 'react';
+import { Property } from '@/types/property';
+import { User } from '@/types/user';
+import { Tenant } from './types';
 
 export default function NewPropertyPage() {
     const router = useRouter();
+    const [showPaymentScheduleModal, setShowPaymentScheduleModal] = useState(false);
+    const [createdProperty, setCreatedProperty] = useState<Property | null>(null);
     const {
         formData,
         loading,
@@ -21,7 +28,8 @@ export default function NewPropertyPage() {
         handleImageChange,
         previewUrls,
         cleanup,
-        removeImage
+        removeImage,
+        createdPropertyData
     } = usePropertyForm();
 
     const {
@@ -31,6 +39,20 @@ export default function NewPropertyPage() {
         setSelectedTenant,
         handleSearchChange
     } = useTenants(currentStep);
+
+    useEffect(() => {
+        if (success && createdPropertyData) {
+            setCreatedProperty(createdPropertyData);
+            setTimeout(() => {
+                setShowPaymentScheduleModal(true);
+            }, 1500);
+        }
+    }, [success, createdPropertyData]);
+
+    const handleClosePaymentScheduleModal = () => {
+        setShowPaymentScheduleModal(false);
+        router.push('/dashboard/owner/accounting');
+    };
 
     const handleTenantSelect = (tenant: typeof selectedTenant) => {
         if (tenant) {
@@ -46,6 +68,17 @@ export default function NewPropertyPage() {
 
     return (
         <div className="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8">
+            {showPaymentScheduleModal && createdProperty && (
+                <CreatePaymentScheduleModal
+                    onClose={handleClosePaymentScheduleModal}
+                    properties={[createdProperty]}
+                    tenants={selectedTenant ? [{
+                        ...selectedTenant,
+                        phone: '',
+                        role: 'TENANT' as const
+                    } satisfies User] : []}
+                />
+            )}
             <div className="bg-white dark:bg-gray-800 rounded-lg shadow-lg p-6">
                 <div className="mb-8">
                     <div className="flex items-center justify-between">

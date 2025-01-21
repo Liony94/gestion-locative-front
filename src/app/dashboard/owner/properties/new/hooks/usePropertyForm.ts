@@ -1,6 +1,7 @@
 import { useState } from 'react';
 import { useRouter } from 'next/navigation';
 import { PropertyFormData } from '../types';
+import { Property } from '@/types/property';
 
 export const usePropertyForm = () => {
     const router = useRouter();
@@ -10,6 +11,7 @@ export const usePropertyForm = () => {
     const [currentStep, setCurrentStep] = useState(1);
     const [selectedImages, setSelectedImages] = useState<File[]>([]);
     const [previewUrls, setPreviewUrls] = useState<string[]>([]);
+    const [createdPropertyData, setCreatedPropertyData] = useState<Property | null>(null);
 
     const [formData, setFormData] = useState<PropertyFormData>({
         title: '',
@@ -97,6 +99,7 @@ export const usePropertyForm = () => {
             }
 
             const property = await createResponse.json();
+            setCreatedPropertyData(property as Property);
 
             if (formData.users.length > 0) {
                 const addTenantsResponse = await fetch(`${process.env.NEXT_PUBLIC_BACKEND_URL}/api/properties/${property.id}/tenants`, {
@@ -114,9 +117,6 @@ export const usePropertyForm = () => {
             }
 
             setSuccess(true);
-            setTimeout(() => {
-                router.push('/dashboard/owner/properties');
-            }, 2000);
         } catch (err) {
             setError(err instanceof Error ? err.message : 'Une erreur est survenue lors de la communication avec le serveur');
         } finally {
@@ -150,6 +150,7 @@ export const usePropertyForm = () => {
         selectedImages,
         previewUrls,
         cleanup,
-        removeImage
+        removeImage,
+        createdPropertyData
     };
 }; 

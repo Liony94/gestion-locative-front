@@ -17,6 +17,7 @@ import { Payment } from '@/types/payment';
 import RecordPaymentModal from '@/app/dashboard/owner/accounting/components/RecordPaymentModal';
 import { Building2, User2, MapPin } from 'lucide-react';
 import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from "@/components/ui/tooltip";
+import PaymentDetailsModal from './PaymentDetailsModal';
 
 interface PaymentListProps {
     payments: Payment[];
@@ -176,6 +177,11 @@ export default function PaymentList({ payments, status }: PaymentListProps) {
                                         dark:border-gray-700
                                     `}
                                     style={{ animationFillMode: 'forwards' }}
+                                    onClick={() => {
+                                        if (!showRecordModal) {
+                                            setSelectedPayment(payment);
+                                        }
+                                    }}
                                 >
                                     <TableCell className="font-medium text-gray-700 dark:text-gray-200">
                                         {isClient ? formatDate(payment.dueDate) : ''}
@@ -237,7 +243,8 @@ export default function PaymentList({ payments, status }: PaymentListProps) {
                                             <Button
                                                 variant="outline"
                                                 size="sm"
-                                                onClick={() => {
+                                                onClick={(e) => {
+                                                    e.stopPropagation();
                                                     setSelectedPayment(payment);
                                                     setShowRecordModal(true);
                                                 }}
@@ -264,6 +271,13 @@ export default function PaymentList({ payments, status }: PaymentListProps) {
                         setShowRecordModal(false);
                         setSelectedPayment(null);
                     }}
+                />
+            )}
+
+            {!showRecordModal && selectedPayment && (
+                <PaymentDetailsModal
+                    payment={selectedPayment}
+                    onClose={() => setSelectedPayment(null)}
                 />
             )}
         </div>

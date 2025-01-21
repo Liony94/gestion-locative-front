@@ -100,9 +100,8 @@ export default function AccountingPage() {
                             stats.totalPaid += payment.paidAmount;
                         } else if (payment.status === 'PENDING') {
                             stats.totalPending += payment.amount;
-                            if (new Date(payment.dueDate) < new Date()) {
-                                stats.totalLate += payment.amount;
-                            }
+                        } else if (payment.status === 'LATE') {
+                            stats.totalLate += payment.amount;
                         }
                     }
                 });
@@ -144,8 +143,8 @@ export default function AccountingPage() {
         // Filtre par statut
         if (activeFilter !== 'all') {
             if (activeFilter === 'paid' && payment.status !== 'PAID') return false;
-            if (activeFilter === 'pending' && (payment.status !== 'PENDING' || new Date(payment.dueDate) < new Date())) return false;
-            if (activeFilter === 'late' && (payment.status !== 'PENDING' || new Date(payment.dueDate) >= new Date())) return false;
+            if (activeFilter === 'late' && payment.status !== 'LATE') return false;
+            if (activeFilter === 'pending' && payment.status !== 'PENDING') return false;
         }
 
         // Filtre par locataire
@@ -347,7 +346,7 @@ export default function AccountingPage() {
                     <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-blue-600"></div>
                 </div>
             ) : (
-                <PaymentList payments={filteredPayments} status={activeFilter} />
+                <PaymentList payments={payments} status={activeFilter} />
             )}
 
             {showCreateModal && (

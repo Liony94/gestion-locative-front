@@ -33,10 +33,7 @@ export default function PaymentList({ payments, status }: PaymentListProps) {
     }, []);
 
     const getStatusBadge = (payment: Payment) => {
-        const isLate = payment.status === 'PENDING' && new Date(payment.dueDate) < new Date();
-        const status = isLate ? 'LATE' : payment.status;
-
-        switch (status) {
+        switch (payment.status) {
             case 'PAID':
                 return (
                     <Badge className="bg-green-100 text-green-800 dark:bg-green-900/30 dark:text-green-400 cursor-pointer hover:bg-green-200 dark:hover:bg-green-900/50">
@@ -107,7 +104,36 @@ export default function PaymentList({ payments, status }: PaymentListProps) {
         );
     }
 
-    if (payments.length === 0) {
+    // Filtrer les paiements selon le statut sélectionné
+    console.log('Status actuel:', status);
+    console.log('Paiements avant filtrage:', payments.map(p => ({
+        id: p.id,
+        status: p.status,
+        dueDate: p.dueDate
+    })));
+
+    const filteredPayments = payments.filter(payment => {
+        if (status === 'all') return true;
+        if (status === 'paid') return payment.status === 'PAID';
+        if (status === 'late') {
+            console.log('Vérification paiement en retard:', {
+                id: payment.id,
+                status: payment.status,
+                isLate: payment.status === 'LATE'
+            });
+            return payment.status === 'LATE';
+        }
+        if (status === 'pending') return payment.status === 'PENDING';
+        return true;
+    });
+
+    console.log('Paiements après filtrage:', filteredPayments.map(p => ({
+        id: p.id,
+        status: p.status,
+        dueDate: p.dueDate
+    })));
+
+    if (filteredPayments.length === 0) {
         return (
             <div className="text-center py-12 px-4 rounded-lg border border-gray-100 dark:border-gray-700 shadow-sm bg-gray-50 dark:bg-gray-800 animate-fade-in-up">
                 <p className="text-gray-500 dark:text-gray-400 text-lg">
@@ -134,7 +160,7 @@ export default function PaymentList({ payments, status }: PaymentListProps) {
                         </TableRow>
                     </TableHeader>
                     <TableBody>
-                        {payments.map((payment, index) => {
+                        {filteredPayments.map((payment, index) => {
                             const tenantInfo = getTenantInfo(payment);
                             const propertyInfo = getPropertyInfo(payment);
 

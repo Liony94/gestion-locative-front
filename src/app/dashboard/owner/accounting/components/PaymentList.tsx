@@ -32,21 +32,32 @@ export default function PaymentList({ payments, status }: PaymentListProps) {
         setIsClient(true);
     }, []);
 
-    const getStatusBadge = (status: PaymentStatus) => {
-        const statusConfig = {
-            [PaymentStatus.PENDING]: { label: 'En attente', className: 'bg-yellow-100 dark:bg-yellow-900/30 text-yellow-800 dark:text-yellow-300 hover:bg-yellow-200 dark:hover:bg-yellow-900/50 transition-colors' },
-            [PaymentStatus.PAID]: { label: 'Payé', className: 'bg-green-100 dark:bg-green-900/30 text-green-800 dark:text-green-300 hover:bg-green-200 dark:hover:bg-green-900/50 transition-colors' },
-            [PaymentStatus.LATE]: { label: 'En retard', className: 'bg-red-100 dark:bg-red-900/30 text-red-800 dark:text-red-300 hover:bg-red-200 dark:hover:bg-red-900/50 transition-colors' },
-            [PaymentStatus.PARTIALLY_PAID]: { label: 'Partiellement payé', className: 'bg-blue-100 dark:bg-blue-900/30 text-blue-800 dark:text-blue-300 hover:bg-blue-200 dark:hover:bg-blue-900/50 transition-colors' },
-            [PaymentStatus.CANCELLED]: { label: 'Annulé', className: 'bg-gray-100 dark:bg-gray-800 text-gray-800 dark:text-gray-300 hover:bg-gray-200 dark:hover:bg-gray-700 transition-colors' },
-        };
+    const getStatusBadge = (payment: Payment) => {
+        const isLate = payment.status === 'PENDING' && new Date(payment.dueDate) < new Date();
+        const status = isLate ? 'LATE' : payment.status;
 
-        const config = statusConfig[status];
-        return (
-            <Badge className={`${config.className} font-medium px-3 py-1 rounded-full`}>
-                {config.label}
-            </Badge>
-        );
+        switch (status) {
+            case 'PAID':
+                return (
+                    <Badge className="bg-green-100 text-green-800 dark:bg-green-900/30 dark:text-green-400 cursor-pointer hover:bg-green-200 dark:hover:bg-green-900/50">
+                        Payé
+                    </Badge>
+                );
+            case 'LATE':
+                return (
+                    <Badge className="bg-red-100 text-red-800 dark:bg-red-900/30 dark:text-red-400 cursor-pointer hover:bg-red-200 dark:hover:bg-red-900/50">
+                        En retard
+                    </Badge>
+                );
+            case 'PENDING':
+                return (
+                    <Badge className="bg-orange-100 text-orange-800 dark:bg-orange-900/30 dark:text-orange-400 cursor-pointer hover:bg-orange-200 dark:hover:bg-orange-900/50">
+                        En attente
+                    </Badge>
+                );
+            default:
+                return null;
+        }
     };
 
     const getTenantInfo = (payment: Payment) => {
@@ -194,7 +205,7 @@ export default function PaymentList({ payments, status }: PaymentListProps) {
                                     <TableCell className="font-medium text-gray-700 dark:text-gray-200">
                                         {formatPrice(payment.amount)}
                                     </TableCell>
-                                    <TableCell>{getStatusBadge(payment.status)}</TableCell>
+                                    <TableCell>{getStatusBadge(payment)}</TableCell>
                                     <TableCell>
                                         {payment.status !== PaymentStatus.PAID && (
                                             <Button

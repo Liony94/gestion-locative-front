@@ -1,4 +1,6 @@
 import { PaymentStatus } from './enums';
+import { Property } from './property';
+import { User } from './user';
 
 export interface User {
     id: number;
@@ -20,8 +22,8 @@ export interface PaymentSchedule {
     startDate: string;
     endDate: string;
     monthlyAmount: number;
-    isActive: boolean;
     dayOfMonth: number;
+    isActive: boolean;
     property: Property;
     tenant: User;
     payments: Payment[];
@@ -33,7 +35,7 @@ export interface Payment {
     amount: number;
     paidAmount: number | null;
     paidAt: string | null;
-    status: PaymentStatus;
+    status: 'PAID' | 'PENDING' | 'LATE';
     paymentMethod: 'BANK_TRANSFER' | 'CASH' | 'CHECK' | 'CREDIT_CARD' | null;
     transactionId: string | null;
     notes: string | null;
@@ -45,14 +47,14 @@ export interface Payment {
 export interface PaymentStatistics {
     totalDue: number;
     totalPaid: number;
-    totalLate: number;
     totalPending: number;
+    totalLate: number;
     balance: number;
 }
 
 export interface RecordPaymentData {
     amount: number;
-    paymentMethod: string;
+    paymentMethod: 'BANK_TRANSFER' | 'CASH' | 'CHECK' | 'CREDIT_CARD';
     transactionId?: string;
     notes?: string;
 } 

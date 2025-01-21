@@ -71,6 +71,25 @@ export const api = {
 
         return response.json();
     },
+
+    put: async (endpoint: string, data: any) => {
+        const token = getAuthToken();
+        const response = await fetch(`${API_URL}/api${endpoint}`, {
+            method: 'PUT',
+            headers: {
+                'Authorization': `Bearer ${token}`,
+                'Content-Type': 'application/json',
+            },
+            body: JSON.stringify(data),
+        });
+
+        if (!response.ok) {
+            const error = await response.json();
+            throw new Error(error.message || 'Une erreur est survenue');
+        }
+
+        return response.json();
+    }
 };
 
 export const authApi = {

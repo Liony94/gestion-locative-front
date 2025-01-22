@@ -1,4 +1,5 @@
 import { UserRole } from "@/app/auth/register/page";
+import axios, { AxiosRequestConfig } from 'axios';
 
 const API_URL = process.env.NEXT_PUBLIC_BACKEND_URL;
 
@@ -28,69 +29,96 @@ interface LoginResponse {
     };
 }
 
-const getAuthToken = () => {
-    if (typeof window !== 'undefined') {
-        return localStorage.getItem('token');
+const api = axios.create({
+    baseURL: process.env.NEXT_PUBLIC_API_URL || 'http://localhost:3001/api',
+    headers: {
+        'Content-Type': 'application/json',
+    },
+});
+
+// Intercepteur pour ajouter le token d'authentification
+api.interceptors.request.use((config) => {
+    const token = localStorage.getItem('token');
+    if (token) {
+        config.headers.Authorization = `Bearer ${token}`;
     }
-    return null;
-};
+    return config;
+});
 
-export const api = {
-    get: async (endpoint: string) => {
-        const token = getAuthToken();
-        const response = await fetch(`${API_URL}/api${endpoint}`, {
-            headers: {
-                'Authorization': `Bearer ${token}`,
-                'Content-Type': 'application/json',
-            },
-        });
-
-        if (!response.ok) {
-            const error = await response.json();
-            throw new Error(error.message || 'Une erreur est survenue');
+// Fonction générique pour les requêtes GET
+const get = async <T>(url: string, config?: AxiosRequestConfig) => {
+    try {
+        const response = await api.get<T>(url, config);
+        return response.data;
+    } catch (error: any) {
+        if (error.response?.status === 401) {
+            localStorage.removeItem('token');
+            window.location.href = '/login';
         }
-
-        return response.json();
-    },
-
-    post: async (endpoint: string, data: any) => {
-        const token = getAuthToken();
-        const response = await fetch(`${API_URL}/api${endpoint}`, {
-            method: 'POST',
-            headers: {
-                'Authorization': `Bearer ${token}`,
-                'Content-Type': 'application/json',
-            },
-            body: JSON.stringify(data),
-        });
-
-        if (!response.ok) {
-            const error = await response.json();
-            throw new Error(error.message || 'Une erreur est survenue');
-        }
-
-        return response.json();
-    },
-
-    put: async (endpoint: string, data: any) => {
-        const token = getAuthToken();
-        const response = await fetch(`${API_URL}/api${endpoint}`, {
-            method: 'PUT',
-            headers: {
-                'Authorization': `Bearer ${token}`,
-                'Content-Type': 'application/json',
-            },
-            body: JSON.stringify(data),
-        });
-
-        if (!response.ok) {
-            const error = await response.json();
-            throw new Error(error.message || 'Une erreur est survenue');
-        }
-
-        return response.json();
+        throw error;
     }
 };
+
+// Fonction spécifique pour les requêtes GET avec réponse de type blob
+const getBlob = async (url: string) => {
+    try {
+        const response = await api.get(url, {
+            responseType: 'blob',
+            headers: {
+                Accept: 'application/pdf',
+            },
+        });
+        return response.data;
+    } catch (error: any) {
+        if (error.response?.status === 401) {
+            localStorage.removeItem('token');
+            window.location.href = '/login';
+        }
+        throw error;
+    }
+};
+
+// Autres méthodes HTTP...
+const post = async <T>(url: string, data?: any) => {
+    try {
+        const response = await api.post<T>(url, data);
+        return response.data;
+    } catch (error: any) {
+        if (error.response?.status === 401) {
+            localStorage.removeItem('token');
+            window.location.href = '/login';
+        }
+        throw error;
+    }
+};
+
+const put = async <T>(url: string, data?: any) => {
+    try {
+        const response = await api.put<T>(url, data);
+        return response.data;
+    } catch (error: any) {
+        if (error.response?.status === 401) {
+            localStorage.removeItem('token');
+            window.location.href = '/login';
+        }
+        throw error;
+    }
+};
+
+const del = async <T>(url: string) => {
+    try {
+        const response = await api.delete<T>(url);
+        return response.data;
+    } catch (error: any) {
+        if (error.response?.status === 401) {
+            localStorage.removeItem('token');
+            window.location.href = '/login';
+        }
+        throw error;
+    }
+};
+
+export { api, get, post, put, del, getBlob };
 
 export const authApi = {
     login: async (credentials: { email: string; password: string; role: UserRole }) => {

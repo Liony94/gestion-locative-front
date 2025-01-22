@@ -39,14 +39,16 @@ export default function AccountingPage() {
         try {
             console.log('Début du chargement des données...');
             const [schedulesResponse, propertiesResponse, tenantsResponse] = await Promise.all([
-                api.get('/payments/schedules'),
-                api.get('/properties'),
-                api.get('/user/role/tenant')
+                api.get<PaymentSchedule[]>('/payments/schedules'),
+                api.get<Property[]>('/properties'),
+                api.get<User[]>('/user/role/tenant')
             ]);
+
+            console.log('Réponse des locataires:', tenantsResponse.data);
 
             // Extraction des paiements depuis les échéanciers
             const allPayments: Payment[] = [];
-            const schedules = schedulesResponse;
+            const schedules = schedulesResponse.data;
 
             if (schedules && Array.isArray(schedules)) {
                 console.log('Nombre d\'échéanciers trouvés:', schedules.length);
@@ -81,12 +83,15 @@ export default function AccountingPage() {
             allPayments.sort((a, b) => new Date(a.dueDate).getTime() - new Date(b.dueDate).getTime());
             setPayments(allPayments);
 
-            if (propertiesResponse) {
-                setProperties(propertiesResponse);
+            if (propertiesResponse.data) {
+                setProperties(propertiesResponse.data);
             }
 
-            if (tenantsResponse) {
-                setTenants(tenantsResponse);
+            if (tenantsResponse.data) {
+                console.log('Structure des locataires:', tenantsResponse.data);
+                // S'assurer que tenantsResponse est un tableau
+                const tenantsArray = Array.isArray(tenantsResponse.data) ? tenantsResponse.data : [];
+                setTenants(tenantsArray);
             }
 
             // Calcul des statistiques
@@ -156,8 +161,8 @@ export default function AccountingPage() {
     const updateLatePayments = async () => {
         try {
             setIsUpdatingStatus(true);
-            const response = await api.post('/payments/update-late-status', {});
-            const { updated } = response;
+            const response = await api.post<{ updated: number }>('/payments/update-late-status', {});
+            const { updated } = response.data;
 
             if (updated > 0) {
                 toast.success(`${updated} paiement(s) mis à jour en retard`);
@@ -342,22 +347,20 @@ export default function AccountingPage() {
                     </TabsList>
                 </Tabs>
 
-                <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-                    {/* Filtre par locataire */}
-                    <div className="relative">
-                        <Users className="absolute left-3 top-1/2 transform -translate-y-1/2 h-4 w-4 text-gray-400" />
+                <div className="flex flex-wrap gap-4">
+                    <div className="flex-1 min-w-[200px]">
+                        <label htmlFor="tenant" className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
+                            <Users className="w-4 h-4 inline-block mr-1" />
+                            Locataire
+                        </label>
                         <select
+                            id="tenant"
                             value={selectedTenant}
-                            onChange={(e) => setSelectedTenant(e.target.value === 'all' ? 'all' : Number(e.target.value))}
-                            className="w-full h-10 pl-10 rounded-lg border border-gray-200 dark:border-gray-700 bg-white dark:bg-gray-800 pr-3 text-sm 
-                                focus:outline-none focus:ring-2 focus:ring-primary/20 focus:border-primary
-                                transition-all duration-200
-                                hover:border-primary/50 dark:hover:border-primary/50
-                                text-gray-600 dark:text-gray-300
-                                shadow-sm hover:shadow-md"
+                            onChange={(e) => setSelectedTenant(e.target.value === 'all' ? 'all' : parseInt(e.target.value))}
+                            className="w-full rounded-md border border-gray-300 bg-white px-3 py-2 text-sm placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500 dark:border-gray-600 dark:bg-gray-700 dark:text-gray-200"
                         >
                             <option value="all">Tous les locataires</option>
-                            {tenants.map((tenant) => (
+                            {Array.isArray(tenants) && tenants.map((tenant) => (
                                 <option key={tenant.id} value={tenant.id}>
                                     {tenant.firstName} {tenant.lastName}
                                 </option>
@@ -365,21 +368,19 @@ export default function AccountingPage() {
                         </select>
                     </div>
 
-                    {/* Filtre par propriété */}
-                    <div className="relative">
-                        <Home className="absolute left-3 top-1/2 transform -translate-y-1/2 h-4 w-4 text-gray-400" />
+                    <div className="flex-1 min-w-[200px]">
+                        <label htmlFor="property" className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
+                            <Home className="w-4 h-4 inline-block mr-1" />
+                            Propriété
+                        </label>
                         <select
+                            id="property"
                             value={selectedProperty}
-                            onChange={(e) => setSelectedProperty(e.target.value === 'all' ? 'all' : Number(e.target.value))}
-                            className="w-full h-10 pl-10 rounded-lg border border-gray-200 dark:border-gray-700 bg-white dark:bg-gray-800 pr-3 text-sm 
-                                focus:outline-none focus:ring-2 focus:ring-primary/20 focus:border-primary
-                                transition-all duration-200
-                                hover:border-primary/50 dark:hover:border-primary/50
-                                text-gray-600 dark:text-gray-300
-                                shadow-sm hover:shadow-md"
+                            onChange={(e) => setSelectedProperty(e.target.value === 'all' ? 'all' : parseInt(e.target.value))}
+                            className="w-full rounded-md border border-gray-300 bg-white px-3 py-2 text-sm placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500 dark:border-gray-600 dark:bg-gray-700 dark:text-gray-200"
                         >
                             <option value="all">Toutes les propriétés</option>
-                            {properties.map((property) => (
+                            {Array.isArray(properties) && properties.map((property) => (
                                 <option key={property.id} value={property.id}>
                                     {property.title}
                                 </option>

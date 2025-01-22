@@ -15,11 +15,11 @@ import { PaymentStatus } from '@/types/enums';
 import { formatDate, formatPrice } from '@/lib/utils';
 import { Payment } from '@/types/payment';
 import RecordPaymentModal from '@/app/dashboard/owner/accounting/components/RecordPaymentModal';
-import { Building2, User2, MapPin, Archive, Undo } from 'lucide-react';
+import { Building2, User2, MapPin, Archive, Undo, FileText } from 'lucide-react';
 import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from "@/components/ui/tooltip";
 import PaymentDetailsModal from './PaymentDetailsModal';
 import { toast } from 'sonner';
-import { api } from '@/services/api';
+import { api, getBlob } from '@/services/api';
 
 interface PaymentListProps {
     payments: Payment[];
@@ -84,6 +84,26 @@ export default function PaymentList({
             onPaymentsUpdate?.();
         } catch (error) {
             toast.error('Erreur lors de l\'archivage des paiements');
+            console.error('Erreur:', error);
+        }
+    };
+
+    const handleDownloadReceipt = async (paymentId: number) => {
+        try {
+            const data = await getBlob(`/payments/${paymentId}/receipt`);
+            const url = window.URL.createObjectURL(data);
+            const link = document.createElement('a');
+            const month = new Date().toLocaleString('fr-FR', { month: 'long', year: 'numeric' });
+            link.href = url;
+            link.setAttribute('download', `quittance_${month.replace(' ', '_')}.pdf`);
+            document.body.appendChild(link);
+            link.click();
+            link.remove();
+            window.URL.revokeObjectURL(url);
+
+            toast.success('Quittance générée avec succès');
+        } catch (error) {
+            toast.error('Erreur lors de la génération de la quittance');
             console.error('Erreur:', error);
         }
     };
@@ -361,6 +381,20 @@ export default function PaymentList({
                                                     className="opacity-0 group-hover:opacity-100 transition-all duration-200"
                                                 >
                                                     Enregistrer le paiement
+                                                </Button>
+                                            )}
+                                            {payment.status === PaymentStatus.PAID && (
+                                                <Button
+                                                    variant="ghost"
+                                                    size="sm"
+                                                    onClick={(e) => {
+                                                        e.stopPropagation();
+                                                        handleDownloadReceipt(payment.id);
+                                                    }}
+                                                    className="opacity-0 group-hover:opacity-100 transition-all duration-200"
+                                                    title="Télécharger la quittance"
+                                                >
+                                                    <FileText className="h-4 w-4" />
                                                 </Button>
                                             )}
                                             {!payment.isArchived ? (

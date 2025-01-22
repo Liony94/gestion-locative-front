@@ -8,9 +8,10 @@ import { Input } from '@/components/ui/input';
 import { Button } from '@/components/ui/button';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { formatDate, formatPrice } from '@/lib/utils';
-import { Loader2, CreditCard, Banknote, Building2, Receipt } from 'lucide-react';
-import { api } from '@/services/api';
+import { Loader2, CreditCard, Banknote, Building2, Receipt, FileText } from 'lucide-react';
+import { api, getBlob } from '@/services/api';
 import { toast } from 'sonner';
+import { Checkbox } from '@/components/ui/checkbox';
 
 interface RecordPaymentModalProps {
     payment: Payment;
@@ -30,6 +31,27 @@ export default function RecordPaymentModal({ payment, onClose }: RecordPaymentMo
     const [transactionId, setTransactionId] = useState('');
     const [notes, setNotes] = useState('');
     const [isLoading, setIsLoading] = useState(false);
+    const [generateReceipt, setGenerateReceipt] = useState(true);
+
+    const handleDownloadReceipt = async (paymentId: number) => {
+        try {
+            const data = await getBlob(`/payments/${paymentId}/receipt`);
+            const url = window.URL.createObjectURL(data);
+            const link = document.createElement('a');
+            const month = new Date().toLocaleString('fr-FR', { month: 'long', year: 'numeric' });
+            link.href = url;
+            link.setAttribute('download', `quittance_${month.replace(' ', '_')}.pdf`);
+            document.body.appendChild(link);
+            link.click();
+            link.remove();
+            window.URL.revokeObjectURL(url);
+
+            toast.success('Quittance générée avec succès');
+        } catch (error) {
+            toast.error('Erreur lors de la génération de la quittance');
+            console.error('Erreur:', error);
+        }
+    };
 
     const handleSubmit = async (e: React.FormEvent) => {
         e.preventDefault();
@@ -44,6 +66,11 @@ export default function RecordPaymentModal({ payment, onClose }: RecordPaymentMo
             });
 
             toast.success('Paiement enregistré avec succès');
+
+            if (generateReceipt) {
+                await handleDownloadReceipt(payment.id);
+            }
+
             onClose();
         } catch (error) {
             console.error('Erreur lors de l\'enregistrement du paiement:', error);
@@ -150,6 +177,22 @@ export default function RecordPaymentModal({ payment, onClose }: RecordPaymentMo
                                 placeholder="Ajouter des notes..."
                                 className="bg-white dark:bg-gray-700"
                             />
+                        </div>
+
+                        <div className="space-y-2">
+                            <div className="flex items-center space-x-2">
+                                <Checkbox
+                                    id="generateReceipt"
+                                    checked={generateReceipt}
+                                    onCheckedChange={(checked: boolean) => setGenerateReceipt(checked)}
+                                />
+                                <Label
+                                    htmlFor="generateReceipt"
+                                    className="text-sm text-gray-700 dark:text-gray-200 cursor-pointer"
+                                >
+                                    Générer la quittance de loyer
+                                </Label>
+                            </div>
                         </div>
                     </div>
 

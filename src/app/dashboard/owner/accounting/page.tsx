@@ -39,8 +39,8 @@ export default function AccountingPage() {
         try {
             console.log('Début du chargement des données...');
             const [schedulesResponse, propertiesResponse, tenantsResponse] = await Promise.all([
-                api.get<PaymentSchedule[]>('/payments/schedules'),
-                api.get<Property[]>('/properties'),
+                api.get<PaymentSchedule[]>('/payments/schedules/owner'),
+                api.get<Property[]>('/properties/owner'),
                 api.get<User[]>('/user/role/tenant')
             ]);
 

@@ -24,7 +24,7 @@ interface DocumentListProps {
 export default function DocumentList({ documents, isLoading, onRefresh }: DocumentListProps) {
     const handleDownload = async (receipt: Receipt) => {
         try {
-            const response = await api.get(`/payments/${receipt.payment.id}/receipt`, {
+            const response = await api.get(`/payments/${receipt.payment.id}/receipt/owner`, {
                 responseType: 'blob',
                 headers: {
                     Accept: 'application/pdf'
@@ -50,7 +50,7 @@ export default function DocumentList({ documents, isLoading, onRefresh }: Docume
 
     const handlePreview = async (document: Receipt) => {
         try {
-            const response = await api.get(`/payments/${document.payment.id}/receipt/preview`, {
+            const response = await api.get(`/payments/${document.payment.id}/receipt/owner/preview`, {
                 responseType: 'blob',
                 headers: {
                     Accept: 'application/pdf'

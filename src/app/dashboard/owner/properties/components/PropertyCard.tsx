@@ -4,7 +4,7 @@ import Link from 'next/link';
 
 interface Property {
     id: number;
-    title: string;
+    identifier: string;
     description: string;
     price: number;
     address: string;
@@ -20,6 +20,8 @@ interface PropertyCardProps {
 }
 
 const createSlug = (title: string): string => {
+    if (!title) return '';
+
     return title
         .toLowerCase()
         .normalize('NFD')
@@ -31,7 +33,7 @@ const createSlug = (title: string): string => {
 export default function PropertyCard({ property }: PropertyCardProps) {
     // Image par défaut si aucune image n'est fournie
     const defaultImage = 'https://images.unsplash.com/photo-1518780664697-55e3ad937233?ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D&auto=format&fit=crop&w=2340&q=80';
-    const slug = `${property.id}-${createSlug(property.title)}`;
+    const slug = `${property.id}-${createSlug(property.identifier)}`;
 
     const getMainImage = () => {
         if (!property.images || property.images.length === 0) {
@@ -76,7 +78,7 @@ export default function PropertyCard({ property }: PropertyCardProps) {
             <div className="relative h-48 w-full rounded-t-lg overflow-hidden">
                 <img
                     src={mainImage}
-                    alt={property.title}
+                    alt={property.identifier}
                     className="w-full h-full object-cover"
                     onError={handleImageError}
                 />
@@ -86,7 +88,7 @@ export default function PropertyCard({ property }: PropertyCardProps) {
                 <div className="flex justify-between items-start">
                     <div>
                         <h3 className="text-lg font-semibold text-gray-900 dark:text-white">
-                            {property.title}
+                            {property.identifier}
                         </h3>
                         <p className="text-sm text-gray-500 dark:text-gray-400 mt-1">
                             {property.address}, {property.zipCode} {property.city}

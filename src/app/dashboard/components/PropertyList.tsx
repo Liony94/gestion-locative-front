@@ -5,7 +5,7 @@ import Link from 'next/link';
 
 interface Property {
     id: number;
-    title: string;
+    identifier: string;
     description: string;
     price: number;
     address: string;
@@ -151,7 +151,7 @@ export default function PropertyList() {
                                     <div className="relative h-24 w-24 rounded-lg overflow-hidden">
                                         <img
                                             src={getMainImage(property)}
-                                            alt={property.title}
+                                            alt={property.identifier}
                                             className="h-full w-full object-cover transform group-hover:scale-110 transition-transform duration-300"
                                             onError={handleImageError}
                                         />
@@ -162,7 +162,7 @@ export default function PropertyList() {
                                 <div className="flex-1 min-w-0">
                                     <div className="flex items-center justify-between">
                                         <h3 className="text-lg font-medium text-gray-900 dark:text-white truncate">
-                                            {property.title}
+                                            {property.identifier}
                                         </h3>
                                         <span className="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-blue-100 text-blue-800 dark:bg-blue-900 dark:text-blue-200">
                                             {property.type}

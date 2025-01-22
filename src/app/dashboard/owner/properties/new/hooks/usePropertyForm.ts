@@ -1,7 +1,8 @@
-import { useState } from 'react';
+import { useState, useCallback } from 'react';
 import { useRouter } from 'next/navigation';
-import { PropertyFormData } from '../types';
+import { PropertyFormData, DEFAULT_PROPERTY_FORM_DATA } from '../types';
 import { Property } from '@/types/property';
+import { api } from '@/services/api';
 
 export const usePropertyForm = () => {
     const router = useRouter();
@@ -13,128 +14,183 @@ export const usePropertyForm = () => {
     const [previewUrls, setPreviewUrls] = useState<string[]>([]);
     const [createdPropertyData, setCreatedPropertyData] = useState<Property | null>(null);
 
-    const [formData, setFormData] = useState<PropertyFormData>({
-        title: '',
-        description: '',
-        price: 0,
-        address: '',
-        city: '',
-        zipCode: '',
-        type: 'Maison',
-        surface: 0,
-        users: [],
-        images: []
-    });
+    const [formData, setFormData] = useState<PropertyFormData>(DEFAULT_PROPERTY_FORM_DATA);
 
-    const handleChange = (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement | HTMLSelectElement>) => {
-        const { name, value } = e.target;
+    const handleChange = useCallback((e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement | HTMLSelectElement>) => {
+        const { name, value, type } = e.target as HTMLInputElement;
+
         setFormData(prev => ({
             ...prev,
-            [name]: ['price', 'surface'].includes(name) ? parseFloat(value) || 0 : value
+            [name]: type === 'checkbox' ? (e.target as HTMLInputElement).checked : value
         }));
-    };
+    }, []);
 
-    const handleImageChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-        if (e.target.files && e.target.files.length > 0) {
-            const newFiles = Array.from(e.target.files);
+    const handleImageChange = useCallback((e: React.ChangeEvent<HTMLInputElement>) => {
+        const files = e.target.files;
+        if (!files) return;
 
-            // Ajouter les nouvelles images aux images existantes
-            setSelectedImages(prevImages => [...prevImages, ...newFiles]);
+        const newPreviewUrls: string[] = [];
+        const fileArray = Array.from(files);
 
-            // Créer des URLs de prévisualisation pour les nouvelles images
-            const newUrls = newFiles.map(file => URL.createObjectURL(file));
-            setPreviewUrls(prevUrls => [...prevUrls, ...newUrls]);
-        }
-    };
+        fileArray.forEach(file => {
+            const reader = new FileReader();
+            reader.onloadend = () => {
+                newPreviewUrls.push(reader.result as string);
+                if (newPreviewUrls.length === fileArray.length) {
+                    setPreviewUrls(prev => [...prev, ...newPreviewUrls]);
+                }
+            };
+            reader.readAsDataURL(file);
+        });
+    }, []);
 
-    const removeImage = (index: number) => {
-        setSelectedImages(prevImages => prevImages.filter((_, i) => i !== index));
+    const removeImage = useCallback((index: number) => {
+        setPreviewUrls(prev => prev.filter((_, i) => i !== index));
+    }, []);
 
-        // Révoquer l'URL de prévisualisation de l'image supprimée
-        URL.revokeObjectURL(previewUrls[index]);
-        setPreviewUrls(prevUrls => prevUrls.filter((_, i) => i !== index));
-    };
-
-    const handleSubmit = async () => {
-        if (currentStep === 1) {
-            setCurrentStep(2);
-            return;
-        }
-
+    const handleSubmit = useCallback(async () => {
         setLoading(true);
         setError(null);
+        setSuccess(false);
 
         try {
-            const token = localStorage.getItem('token');
-            const formDataToSend = new FormData();
-
-            // Ajouter les champs du formulaire
-            Object.keys(formData).forEach(key => {
-                if (key !== 'images' && key !== 'users') {
-                    formDataToSend.append(key, formData[key].toString());
+            // Fonction utilitaire pour convertir les nombres décimaux
+            const toDecimal = (value: any): string => {
+                if (value === null || value === undefined || value === '') {
+                    return '0.00';
                 }
-            });
+                const strValue = String(value).replace(',', '.');
+                const num = parseFloat(strValue);
+                return isNaN(num) ? '0.00' : num.toFixed(2);
+            };
 
-            // Ajouter les images
-            selectedImages.forEach(image => {
-                formDataToSend.append('images', image);
-            });
+            // Fonction utilitaire pour convertir les entiers
+            const toInteger = (value: any): number => {
+                if (value === null || value === undefined || value === '') {
+                    return 0;
+                }
+                const num = parseInt(String(value));
+                return isNaN(num) ? 0 : num;
+            };
 
-            console.log('Envoi des données:', {
-                images: selectedImages.map(img => img.name),
-                formData: Object.fromEntries(formDataToSend.entries())
-            });
+            // Préparer les données avec les bonnes conversions de types
+            const propertyData = {
+                // Champs obligatoires avec valeurs par défaut
+                identifier: formData.identifier || '',
+                type: formData.type || 'APARTMENT',
+                address: formData.address || '',
+                city: formData.city || '',
+                zipCode: formData.zipCode || '',
+                country: formData.country || 'France',
 
-            const createResponse = await fetch(`${process.env.NEXT_PUBLIC_BACKEND_URL}/api/properties/new`, {
-                method: 'POST',
-                headers: {
-                    'Authorization': `Bearer ${token}`
-                },
-                body: formDataToSend
-            });
+                // Conversion forcée en chaînes décimales
+                rentExcludingCharges: toDecimal(formData.rentExcludingCharges),
+                charges: toDecimal(formData.charges),
+                surface: toDecimal(formData.surface),
+                acquisitionPrice: formData.acquisitionPrice ? toDecimal(formData.acquisitionPrice) : undefined,
+                acquisitionFees: formData.acquisitionFees ? toDecimal(formData.acquisitionFees) : undefined,
+                agencyFees: formData.agencyFees ? toDecimal(formData.agencyFees) : undefined,
+                currentValue: formData.currentValue ? toDecimal(formData.currentValue) : undefined,
+                housingTax: formData.housingTax ? toDecimal(formData.housingTax) : undefined,
+                propertyTax: formData.propertyTax ? toDecimal(formData.propertyTax) : undefined,
 
-            if (!createResponse.ok) {
-                const data = await createResponse.json();
-                throw new Error(data.message || 'Erreur lors de la création du bien');
-            }
+                // Conversion forcée en entiers
+                numberOfRooms: formData.numberOfRooms ? toInteger(formData.numberOfRooms) : undefined,
+                numberOfBedrooms: formData.numberOfBedrooms ? toInteger(formData.numberOfBedrooms) : undefined,
+                numberOfBathrooms: formData.numberOfBathrooms ? toInteger(formData.numberOfBathrooms) : undefined,
 
-            const property = await createResponse.json();
-            setCreatedPropertyData(property as Property);
+                // Conversion forcée en booléens
+                isFurnished: Boolean(formData.isFurnished),
+                smokersAllowed: Boolean(formData.smokersAllowed),
+                petsAllowed: Boolean(formData.petsAllowed),
+                isAvailableForRent: Boolean(formData.isAvailableForRent),
 
-            if (formData.users.length > 0) {
-                const addTenantsResponse = await fetch(`${process.env.NEXT_PUBLIC_BACKEND_URL}/api/properties/${property.id}/tenants`, {
-                    method: 'POST',
-                    headers: {
-                        'Content-Type': 'application/json',
-                        'Authorization': `Bearer ${token}`
-                    },
-                    body: JSON.stringify({ tenantIds: formData.users })
+                // Initialisation des tableaux
+                equipment: Array.isArray(formData.equipment) ? formData.equipment : [],
+                outdoorSpaces: Array.isArray(formData.outdoorSpaces) ? formData.outdoorSpaces : [],
+                buildingAmenities: Array.isArray(formData.buildingAmenities) ? formData.buildingAmenities : [],
+                securityFeatures: Array.isArray(formData.securityFeatures) ? formData.securityFeatures : [],
+                sportsFacilities: Array.isArray(formData.sportsFacilities) ? formData.sportsFacilities : [],
+
+                // Dates
+                constructionDate: formData.constructionDate ? new Date(formData.constructionDate).toISOString() : undefined,
+                acquisitionDate: formData.acquisitionDate ? new Date(formData.acquisitionDate).toISOString() : undefined,
+                activityStartDate: formData.activityStartDate ? new Date(formData.activityStartDate).toISOString() : undefined,
+
+                // Autres champs optionnels
+                address2: formData.address2 || undefined,
+                building: formData.building || undefined,
+                staircase: formData.staircase || undefined,
+                floor: formData.floor || undefined,
+                number: formData.number || undefined,
+                region: formData.region || undefined,
+                description: formData.description || undefined,
+                privateNote: formData.privateNote || undefined,
+                publicDescription: formData.publicDescription || undefined,
+                internalRules: formData.internalRules || undefined,
+                propertyVisibility: formData.propertyVisibility || undefined,
+                addressVisibility: formData.addressVisibility || undefined,
+                phoneVisibility: formData.phoneVisibility || undefined,
+
+                // Autres champs du formulaire
+                buildingType: formData.buildingType || undefined,
+                buildingLegalStatus: formData.buildingLegalStatus || undefined,
+                lotNumber: formData.lotNumber || undefined,
+                coownershipUnits: formData.coownershipUnits || undefined,
+                cadastralReference: formData.cadastralReference || undefined,
+                taxRegime: formData.taxRegime || undefined,
+                siret: formData.siret || undefined,
+                taxNumber: formData.taxNumber || undefined,
+                taxCenterName: formData.taxCenterName || undefined,
+                taxCenterAddress: formData.taxCenterAddress || undefined,
+                taxCenterAddress2: formData.taxCenterAddress2 || undefined,
+                taxCenterZipCode: formData.taxCenterZipCode || undefined,
+                taxCenterCity: formData.taxCenterCity || undefined,
+                taxNotes: formData.taxNotes || undefined,
+                paymentFrequency: formData.paymentFrequency || undefined
+            };
+
+            // Si des images sont présentes, créer un FormData
+            if (selectedImages && selectedImages.length > 0) {
+                const formDataToSend = new FormData();
+                formDataToSend.append('propertyData', JSON.stringify(propertyData));
+                selectedImages.forEach((image, index) => {
+                    formDataToSend.append('images', image);
                 });
 
-                if (!addTenantsResponse.ok) {
-                    throw new Error('Erreur lors de l\'ajout des locataires');
-                }
+                // Appeler l'API avec le FormData
+                const response = await api.post('/properties', formDataToSend, {
+                    headers: {
+                        'Content-Type': 'multipart/form-data',
+                    },
+                });
+                setCreatedPropertyData(response.data);
+            } else {
+                // Appeler l'API avec les données JSON
+                const response = await api.post('/properties', propertyData, {
+                    headers: {
+                        'Content-Type': 'application/json',
+                    },
+                });
+                setCreatedPropertyData(response.data);
             }
 
             setSuccess(true);
-        } catch (err) {
-            setError(err instanceof Error ? err.message : 'Une erreur est survenue lors de la communication avec le serveur');
+        } catch (err: any) {
+            console.error('Erreur détaillée:', err.response?.data);
+            setError(err.response?.data?.message?.[0] || 'Une erreur est survenue lors de la création du bien');
         } finally {
             setLoading(false);
         }
-    };
+    }, [formData, selectedImages]);
 
-    const updateUsers = (userId: number) => {
-        setFormData(prev => ({
-            ...prev,
-            users: [userId]
-        }));
-    };
-
-    // Nettoyer les URLs de prévisualisation lors du démontage du composant
-    const cleanup = () => {
-        previewUrls.forEach(url => URL.revokeObjectURL(url));
-    };
+    const cleanup = useCallback(() => {
+        setFormData(DEFAULT_PROPERTY_FORM_DATA);
+        setPreviewUrls([]);
+        setError(null);
+        setSuccess(false);
+        setCreatedPropertyData(null);
+    }, []);
 
     return {
         formData,
@@ -145,7 +201,6 @@ export const usePropertyForm = () => {
         setCurrentStep,
         handleChange,
         handleSubmit,
-        updateUsers,
         handleImageChange,
         selectedImages,
         previewUrls,

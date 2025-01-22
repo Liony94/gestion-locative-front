@@ -22,17 +22,20 @@ interface DocumentListProps {
 }
 
 export default function DocumentList({ documents, isLoading, onRefresh }: DocumentListProps) {
-    const handleDownload = async (document: Receipt) => {
+    const handleDownload = async (receipt: Receipt) => {
         try {
-            const response = await api.get(`/payments/receipts/${document.id}/download`, {
-                responseType: 'blob'
+            const response = await api.get(`/payments/${receipt.payment.id}/receipt`, {
+                responseType: 'blob',
+                headers: {
+                    Accept: 'application/pdf'
+                }
             });
 
             const blob = new Blob([response.data], { type: 'application/pdf' });
             const url = window.URL.createObjectURL(blob);
             const link = document.createElement('a');
             link.href = url;
-            link.setAttribute('download', document.fileName);
+            link.setAttribute('download', receipt.fileName);
             document.body.appendChild(link);
             link.click();
             link.remove();
@@ -47,8 +50,11 @@ export default function DocumentList({ documents, isLoading, onRefresh }: Docume
 
     const handlePreview = async (document: Receipt) => {
         try {
-            const response = await api.get(`/payments/receipts/${document.id}/download`, {
-                responseType: 'blob'
+            const response = await api.get(`/payments/${document.payment.id}/receipt/preview`, {
+                responseType: 'blob',
+                headers: {
+                    Accept: 'application/pdf'
+                }
             });
 
             const blob = new Blob([response.data], { type: 'application/pdf' });

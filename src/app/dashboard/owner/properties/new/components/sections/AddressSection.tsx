@@ -1,4 +1,9 @@
 import { PropertyFormData } from '../../types';
+import { HiOutlineHome, HiOutlineOfficeBuilding, HiOutlineLocationMarker } from 'react-icons/hi';
+import { FaBuilding } from 'react-icons/fa';
+import { BsBuilding } from 'react-icons/bs';
+import { IoEarthOutline } from 'react-icons/io5';
+import React from 'react';
 
 interface AddressSectionProps {
     formData: PropertyFormData;
@@ -6,154 +11,180 @@ interface AddressSectionProps {
 }
 
 export const AddressSection = ({ formData, onChange }: AddressSectionProps) => {
+    const inputClasses = "block w-full pl-10 pr-3 py-2 text-sm rounded-lg border-gray-300 dark:border-gray-600 dark:bg-gray-700 focus:ring-blue-500 focus:border-blue-500 transition-colors duration-200";
+    const labelClasses = "block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1";
+    const iconWrapperClasses = "absolute left-3 top-[2.1rem] text-gray-400 dark:text-gray-500 pointer-events-none";
+
     return (
-        <div className="grid grid-cols-1 gap-6 md:grid-cols-2">
-            <div className="md:col-span-2">
-                <label htmlFor="address" className="block text-sm font-medium text-gray-700 dark:text-gray-300">
-                    Adresse
-                </label>
-                <input
-                    type="text"
-                    id="address"
-                    name="address"
-                    required
-                    value={formData.address}
-                    onChange={onChange}
-                    className="mt-1 block w-full rounded-md border-gray-300 dark:border-gray-700 dark:bg-gray-900 shadow-sm focus:border-blue-500 focus:ring-blue-500"
-                    placeholder="Numéro et nom de la rue"
-                />
+        <div className="space-y-8">
+            <div className="bg-white dark:bg-gray-800 rounded-xl p-6 shadow-sm">
+                <div className="border-b dark:border-gray-700 pb-4 mb-6">
+                    <h3 className="text-xl font-semibold text-gray-900 dark:text-white">
+                        Adresse principale
+                    </h3>
+                    <p className="mt-1 text-sm text-gray-500 dark:text-gray-400">
+                        Renseignez l'adresse complète du bien
+                    </p>
+                </div>
+
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                    <div className="relative">
+                        <label htmlFor="address" className={labelClasses}>
+                            Adresse
+                        </label>
+                        <div className={iconWrapperClasses}>
+                            <HiOutlineLocationMarker size={20} />
+                        </div>
+                        <input
+                            type="text"
+                            id="address"
+                            name="address"
+                            value={formData.address || ''}
+                            onChange={onChange}
+                            className={inputClasses}
+                            placeholder="123 rue de la République"
+                        />
+                    </div>
+
+                    <div className="relative">
+                        <label htmlFor="additionalAddress" className={labelClasses}>
+                            Complément d'adresse
+                        </label>
+                        <div className={iconWrapperClasses}>
+                            <HiOutlineHome size={20} />
+                        </div>
+                        <input
+                            type="text"
+                            id="additionalAddress"
+                            name="additionalAddress"
+                            value={formData.additionalAddress || ''}
+                            onChange={onChange}
+                            className={inputClasses}
+                            placeholder="Appartement, suite, etc."
+                        />
+                    </div>
+                </div>
             </div>
 
-            <div className="md:col-span-2">
-                <label htmlFor="address2" className="block text-sm font-medium text-gray-700 dark:text-gray-300">
-                    Complément d'adresse
-                </label>
-                <input
-                    type="text"
-                    id="address2"
-                    name="address2"
-                    value={formData.address2 || ''}
-                    onChange={onChange}
-                    className="mt-1 block w-full rounded-md border-gray-300 dark:border-gray-700 dark:bg-gray-900 shadow-sm focus:border-blue-500 focus:ring-blue-500"
-                    placeholder="Appartement, suite, unité, etc."
-                />
-            </div>
+            <div className="bg-white dark:bg-gray-800 rounded-xl p-6 shadow-sm">
+                <div className="border-b dark:border-gray-700 pb-4 mb-6">
+                    <h3 className="text-xl font-semibold text-gray-900 dark:text-white">
+                        Localisation
+                    </h3>
+                    <p className="mt-1 text-sm text-gray-500 dark:text-gray-400">
+                        Précisez la localisation exacte du bien
+                    </p>
+                </div>
 
-            <div>
-                <label htmlFor="building" className="block text-sm font-medium text-gray-700 dark:text-gray-300">
-                    Bâtiment
-                </label>
-                <input
-                    type="text"
-                    id="building"
-                    name="building"
-                    value={formData.building || ''}
-                    onChange={onChange}
-                    className="mt-1 block w-full rounded-md border-gray-300 dark:border-gray-700 dark:bg-gray-900 shadow-sm focus:border-blue-500 focus:ring-blue-500"
-                />
-            </div>
+                <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+                    <div className="relative">
+                        <label htmlFor="building" className={labelClasses}>
+                            Bâtiment
+                        </label>
+                        <div className={iconWrapperClasses}>
+                            <HiOutlineOfficeBuilding size={20} />
+                        </div>
+                        <input
+                            type="text"
+                            id="building"
+                            name="building"
+                            value={formData.building || ''}
+                            onChange={onChange}
+                            className={inputClasses}
+                            placeholder="Bâtiment A"
+                        />
+                    </div>
 
-            <div>
-                <label htmlFor="staircase" className="block text-sm font-medium text-gray-700 dark:text-gray-300">
-                    Escalier
-                </label>
-                <input
-                    type="text"
-                    id="staircase"
-                    name="staircase"
-                    value={formData.staircase || ''}
-                    onChange={onChange}
-                    className="mt-1 block w-full rounded-md border-gray-300 dark:border-gray-700 dark:bg-gray-900 shadow-sm focus:border-blue-500 focus:ring-blue-500"
-                />
-            </div>
+                    <div className="relative">
+                        <label htmlFor="staircase" className={labelClasses}>
+                            Escalier
+                        </label>
+                        <div className={iconWrapperClasses}>
+                            <FaBuilding size={20} />
+                        </div>
+                        <input
+                            type="text"
+                            id="staircase"
+                            name="staircase"
+                            value={formData.staircase || ''}
+                            onChange={onChange}
+                            className={inputClasses}
+                            placeholder="Escalier 1"
+                        />
+                    </div>
 
-            <div>
-                <label htmlFor="floor" className="block text-sm font-medium text-gray-700 dark:text-gray-300">
-                    Étage
-                </label>
-                <input
-                    type="text"
-                    id="floor"
-                    name="floor"
-                    value={formData.floor || ''}
-                    onChange={onChange}
-                    className="mt-1 block w-full rounded-md border-gray-300 dark:border-gray-700 dark:bg-gray-900 shadow-sm focus:border-blue-500 focus:ring-blue-500"
-                />
-            </div>
+                    <div className="relative">
+                        <label htmlFor="floor" className={labelClasses}>
+                            Étage
+                        </label>
+                        <div className={iconWrapperClasses}>
+                            <BsBuilding size={20} />
+                        </div>
+                        <input
+                            type="text"
+                            id="floor"
+                            name="floor"
+                            value={formData.floor || ''}
+                            onChange={onChange}
+                            className={inputClasses}
+                            placeholder="3ème étage"
+                        />
+                    </div>
 
-            <div>
-                <label htmlFor="number" className="block text-sm font-medium text-gray-700 dark:text-gray-300">
-                    Numéro
-                </label>
-                <input
-                    type="text"
-                    id="number"
-                    name="number"
-                    value={formData.number || ''}
-                    onChange={onChange}
-                    className="mt-1 block w-full rounded-md border-gray-300 dark:border-gray-700 dark:bg-gray-900 shadow-sm focus:border-blue-500 focus:ring-blue-500"
-                />
-            </div>
+                    <div className="relative">
+                        <label htmlFor="city" className={labelClasses}>
+                            Ville
+                        </label>
+                        <div className={iconWrapperClasses}>
+                            <IoEarthOutline size={20} />
+                        </div>
+                        <input
+                            type="text"
+                            id="city"
+                            name="city"
+                            value={formData.city || ''}
+                            onChange={onChange}
+                            className={inputClasses}
+                            placeholder="Paris"
+                        />
+                    </div>
 
-            <div>
-                <label htmlFor="zipCode" className="block text-sm font-medium text-gray-700 dark:text-gray-300">
-                    Code postal
-                </label>
-                <input
-                    type="text"
-                    id="zipCode"
-                    name="zipCode"
-                    required
-                    value={formData.zipCode}
-                    onChange={onChange}
-                    className="mt-1 block w-full rounded-md border-gray-300 dark:border-gray-700 dark:bg-gray-900 shadow-sm focus:border-blue-500 focus:ring-blue-500"
-                    pattern="[0-9]{5}"
-                    title="Le code postal doit contenir 5 chiffres"
-                />
-            </div>
+                    <div className="relative">
+                        <label htmlFor="zipCode" className={labelClasses}>
+                            Code postal
+                        </label>
+                        <div className={iconWrapperClasses}>
+                            <HiOutlineLocationMarker size={20} />
+                        </div>
+                        <input
+                            type="text"
+                            id="zipCode"
+                            name="zipCode"
+                            value={formData.zipCode || ''}
+                            onChange={onChange}
+                            className={inputClasses}
+                            placeholder="75001"
+                        />
+                    </div>
 
-            <div>
-                <label htmlFor="city" className="block text-sm font-medium text-gray-700 dark:text-gray-300">
-                    Ville
-                </label>
-                <input
-                    type="text"
-                    id="city"
-                    name="city"
-                    required
-                    value={formData.city}
-                    onChange={onChange}
-                    className="mt-1 block w-full rounded-md border-gray-300 dark:border-gray-700 dark:bg-gray-900 shadow-sm focus:border-blue-500 focus:ring-blue-500"
-                />
-            </div>
-
-            <div>
-                <label htmlFor="region" className="block text-sm font-medium text-gray-700 dark:text-gray-300">
-                    Région
-                </label>
-                <input
-                    type="text"
-                    id="region"
-                    name="region"
-                    value={formData.region || ''}
-                    onChange={onChange}
-                    className="mt-1 block w-full rounded-md border-gray-300 dark:border-gray-700 dark:bg-gray-900 shadow-sm focus:border-blue-500 focus:ring-blue-500"
-                />
-            </div>
-
-            <div>
-                <label htmlFor="country" className="block text-sm font-medium text-gray-700 dark:text-gray-300">
-                    Pays
-                </label>
-                <input
-                    type="text"
-                    id="country"
-                    name="country"
-                    required
-                    value={formData.country}
-                    onChange={onChange}
-                    className="mt-1 block w-full rounded-md border-gray-300 dark:border-gray-700 dark:bg-gray-900 shadow-sm focus:border-blue-500 focus:ring-blue-500"
-                />
+                    <div className="relative">
+                        <label htmlFor="country" className={labelClasses}>
+                            Pays
+                        </label>
+                        <div className={iconWrapperClasses}>
+                            <IoEarthOutline size={20} />
+                        </div>
+                        <input
+                            type="text"
+                            id="country"
+                            name="country"
+                            value={formData.country || ''}
+                            onChange={onChange}
+                            className={inputClasses}
+                            placeholder="France"
+                        />
+                    </div>
+                </div>
             </div>
         </div>
     );

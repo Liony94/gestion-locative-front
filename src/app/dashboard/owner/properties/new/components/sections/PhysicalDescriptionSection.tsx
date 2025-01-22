@@ -1,4 +1,10 @@
-import { PropertyFormData, BuildingType, BuildingLegalStatus } from '../../types';
+import React from 'react';
+import { PropertyFormData } from '../../types';
+import { HiOutlineHome, HiOutlineOfficeBuilding } from 'react-icons/hi';
+import { BsRulers, BsBuildingUp, BsCalendarDate } from 'react-icons/bs';
+import { MdOutlineMeetingRoom, MdOutlineKingBed, MdOutlineBathtub } from 'react-icons/md';
+import { FaRegBuilding } from 'react-icons/fa';
+import { TbBuildingEstate } from 'react-icons/tb';
 
 interface PhysicalDescriptionSectionProps {
     formData: PropertyFormData;
@@ -6,212 +12,227 @@ interface PhysicalDescriptionSectionProps {
 }
 
 export const PhysicalDescriptionSection = ({ formData, onChange }: PhysicalDescriptionSectionProps) => {
+    const inputClasses = "block w-full pl-10 pr-3 py-2 text-sm rounded-lg border-gray-300 dark:border-gray-600 dark:bg-gray-700 focus:ring-blue-500 focus:border-blue-500 transition-colors duration-200";
+    const selectClasses = "block w-full pl-10 pr-3 py-2 text-sm rounded-lg border-gray-300 dark:border-gray-600 dark:bg-gray-700 focus:ring-blue-500 focus:border-blue-500 transition-colors duration-200";
+    const labelClasses = "block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1";
+    const iconWrapperClasses = "absolute left-3 top-[2.1rem] text-gray-400 dark:text-gray-500 pointer-events-none";
+    const textareaClasses = "block w-full px-3 py-2 text-sm rounded-lg border-gray-300 dark:border-gray-600 dark:bg-gray-700 focus:ring-blue-500 focus:border-blue-500 transition-colors duration-200";
+
     return (
-        <div className="grid grid-cols-1 gap-6 md:grid-cols-2">
-            <div>
-                <label htmlFor="surface" className="block text-sm font-medium text-gray-700 dark:text-gray-300">
-                    Surface (m²)
-                </label>
-                <input
-                    type="number"
-                    id="surface"
-                    name="surface"
-                    required
-                    min="0"
-                    step="0.01"
-                    value={formData.surface}
-                    onChange={onChange}
-                    className="mt-1 block w-full rounded-md border-gray-300 dark:border-gray-700 dark:bg-gray-900 shadow-sm focus:border-blue-500 focus:ring-blue-500"
-                />
-            </div>
-
-            <div>
-                <label htmlFor="numberOfRooms" className="block text-sm font-medium text-gray-700 dark:text-gray-300">
-                    Nombre de pièces
-                </label>
-                <input
-                    type="number"
-                    id="numberOfRooms"
-                    name="numberOfRooms"
-                    min="0"
-                    value={formData.numberOfRooms || ''}
-                    onChange={onChange}
-                    className="mt-1 block w-full rounded-md border-gray-300 dark:border-gray-700 dark:bg-gray-900 shadow-sm focus:border-blue-500 focus:ring-blue-500"
-                />
-            </div>
-
-            <div>
-                <label htmlFor="numberOfBedrooms" className="block text-sm font-medium text-gray-700 dark:text-gray-300">
-                    Nombre de chambres
-                </label>
-                <input
-                    type="number"
-                    id="numberOfBedrooms"
-                    name="numberOfBedrooms"
-                    min="0"
-                    value={formData.numberOfBedrooms || ''}
-                    onChange={onChange}
-                    className="mt-1 block w-full rounded-md border-gray-300 dark:border-gray-700 dark:bg-gray-900 shadow-sm focus:border-blue-500 focus:ring-blue-500"
-                />
-            </div>
-
-            <div>
-                <label htmlFor="numberOfBathrooms" className="block text-sm font-medium text-gray-700 dark:text-gray-300">
-                    Nombre de salles de bain
-                </label>
-                <input
-                    type="number"
-                    id="numberOfBathrooms"
-                    name="numberOfBathrooms"
-                    min="0"
-                    value={formData.numberOfBathrooms || ''}
-                    onChange={onChange}
-                    className="mt-1 block w-full rounded-md border-gray-300 dark:border-gray-700 dark:bg-gray-900 shadow-sm focus:border-blue-500 focus:ring-blue-500"
-                />
-            </div>
-
-            <div>
-                <label htmlFor="constructionDate" className="block text-sm font-medium text-gray-700 dark:text-gray-300">
-                    Date de construction
-                </label>
-                <input
-                    type="date"
-                    id="constructionDate"
-                    name="constructionDate"
-                    value={formData.constructionDate ? new Date(formData.constructionDate).toISOString().split('T')[0] : ''}
-                    onChange={onChange}
-                    className="mt-1 block w-full rounded-md border-gray-300 dark:border-gray-700 dark:bg-gray-900 shadow-sm focus:border-blue-500 focus:ring-blue-500"
-                />
-            </div>
-
-            <div>
-                <label htmlFor="buildingType" className="block text-sm font-medium text-gray-700 dark:text-gray-300">
-                    Type de bâtiment
-                </label>
-                <select
-                    id="buildingType"
-                    name="buildingType"
-                    value={formData.buildingType || ''}
-                    onChange={onChange}
-                    className="mt-1 block w-full rounded-md border-gray-300 dark:border-gray-700 dark:bg-gray-900 shadow-sm focus:border-blue-500 focus:ring-blue-500"
-                >
-                    <option value="">Sélectionner un type</option>
-                    {Object.entries(BuildingType).map(([key, value]) => (
-                        <option key={key} value={value}>{key}</option>
-                    ))}
-                </select>
-            </div>
-
-            <div>
-                <label htmlFor="buildingLegalStatus" className="block text-sm font-medium text-gray-700 dark:text-gray-300">
-                    Statut juridique
-                </label>
-                <select
-                    id="buildingLegalStatus"
-                    name="buildingLegalStatus"
-                    value={formData.buildingLegalStatus || ''}
-                    onChange={onChange}
-                    className="mt-1 block w-full rounded-md border-gray-300 dark:border-gray-700 dark:bg-gray-900 shadow-sm focus:border-blue-500 focus:ring-blue-500"
-                >
-                    <option value="">Sélectionner un statut</option>
-                    {Object.entries(BuildingLegalStatus).map(([key, value]) => (
-                        <option key={key} value={value}>{key}</option>
-                    ))}
-                </select>
-            </div>
-
-            <div className="md:col-span-2">
-                <label htmlFor="description" className="block text-sm font-medium text-gray-700 dark:text-gray-300">
-                    Description
-                </label>
-                <textarea
-                    id="description"
-                    name="description"
-                    rows={4}
-                    value={formData.description || ''}
-                    onChange={onChange}
-                    className="mt-1 block w-full rounded-md border-gray-300 dark:border-gray-700 dark:bg-gray-900 shadow-sm focus:border-blue-500 focus:ring-blue-500"
-                    placeholder="Description détaillée du bien..."
-                />
-            </div>
-
-            <div className="md:col-span-2">
-                <label htmlFor="privateNote" className="block text-sm font-medium text-gray-700 dark:text-gray-300">
-                    Note privée
-                </label>
-                <textarea
-                    id="privateNote"
-                    name="privateNote"
-                    rows={4}
-                    value={formData.privateNote || ''}
-                    onChange={onChange}
-                    className="mt-1 block w-full rounded-md border-gray-300 dark:border-gray-700 dark:bg-gray-900 shadow-sm focus:border-blue-500 focus:ring-blue-500"
-                    placeholder="Notes privées (visibles uniquement par vous)..."
-                />
-            </div>
-
-            <div className="md:col-span-2 space-y-4">
-                <div className="flex items-center space-x-3">
-                    <input
-                        type="checkbox"
-                        id="isFurnished"
-                        name="isFurnished"
-                        checked={formData.isFurnished}
-                        onChange={(e) => onChange({
-                            ...e,
-                            target: {
-                                ...e.target,
-                                name: 'isFurnished',
-                                value: e.target.checked
-                            }
-                        } as any)}
-                        className="h-4 w-4 rounded border-gray-300 text-blue-600 focus:ring-blue-500"
-                    />
-                    <label htmlFor="isFurnished" className="text-sm font-medium text-gray-700 dark:text-gray-300">
-                        Meublé
-                    </label>
+        <div className="space-y-8">
+            <div className="bg-white dark:bg-gray-800 rounded-xl p-6 shadow-sm">
+                <div className="border-b dark:border-gray-700 pb-4 mb-6">
+                    <h3 className="text-xl font-semibold text-gray-900 dark:text-white">
+                        Description physique
+                    </h3>
+                    <p className="mt-1 text-sm text-gray-500 dark:text-gray-400">
+                        Renseignez les caractéristiques physiques du bien
+                    </p>
                 </div>
 
-                <div className="flex items-center space-x-3">
-                    <input
-                        type="checkbox"
-                        id="smokersAllowed"
-                        name="smokersAllowed"
-                        checked={formData.smokersAllowed}
-                        onChange={(e) => onChange({
-                            ...e,
-                            target: {
-                                ...e.target,
-                                name: 'smokersAllowed',
-                                value: e.target.checked
-                            }
-                        } as any)}
-                        className="h-4 w-4 rounded border-gray-300 text-blue-600 focus:ring-blue-500"
-                    />
-                    <label htmlFor="smokersAllowed" className="text-sm font-medium text-gray-700 dark:text-gray-300">
-                        Fumeurs autorisés
-                    </label>
+                <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+                    <div className="relative">
+                        <label htmlFor="propertyType" className={labelClasses}>
+                            Type de bien
+                        </label>
+                        <div className={iconWrapperClasses}>
+                            <HiOutlineHome size={20} />
+                        </div>
+                        <select
+                            id="propertyType"
+                            name="propertyType"
+                            value={formData.propertyType || ''}
+                            onChange={onChange}
+                            className={selectClasses}
+                        >
+                            <option value="">Sélectionnez un type</option>
+                            <option value="HOUSE">Maison</option>
+                            <option value="APARTMENT">Appartement</option>
+                            <option value="STUDIO">Studio</option>
+                            <option value="LOFT">Loft</option>
+                            <option value="VILLA">Villa</option>
+                        </select>
+                    </div>
+
+                    <div className="relative">
+                        <label htmlFor="buildingType" className={labelClasses}>
+                            Type de construction
+                        </label>
+                        <div className={iconWrapperClasses}>
+                            <FaRegBuilding size={20} />
+                        </div>
+                        <select
+                            id="buildingType"
+                            name="buildingType"
+                            value={formData.buildingType || ''}
+                            onChange={onChange}
+                            className={selectClasses}
+                        >
+                            <option value="">Sélectionnez un type</option>
+                            <option value="INDIVIDUAL">Individuel</option>
+                            <option value="COLLECTIVE">Collectif</option>
+                        </select>
+                    </div>
+
+                    <div className="relative">
+                        <label htmlFor="legalStatus" className={labelClasses}>
+                            Statut juridique
+                        </label>
+                        <div className={iconWrapperClasses}>
+                            <TbBuildingEstate size={20} />
+                        </div>
+                        <select
+                            id="legalStatus"
+                            name="legalStatus"
+                            value={formData.legalStatus || ''}
+                            onChange={onChange}
+                            className={selectClasses}
+                        >
+                            <option value="">Sélectionnez un statut</option>
+                            <option value="CONDOMINIUM">Copropriété</option>
+                            <option value="SINGLE_OWNER">Propriétaire unique</option>
+                        </select>
+                    </div>
+
+                    <div className="relative">
+                        <label htmlFor="livingSpace" className={labelClasses}>
+                            Surface habitable (m²)
+                        </label>
+                        <div className={iconWrapperClasses}>
+                            <BsRulers size={20} />
+                        </div>
+                        <input
+                            type="number"
+                            id="livingSpace"
+                            name="livingSpace"
+                            value={formData.livingSpace || ''}
+                            onChange={onChange}
+                            className={inputClasses}
+                            placeholder="80"
+                            min="0"
+                            step="0.01"
+                        />
+                    </div>
+
+                    <div className="relative">
+                        <label htmlFor="totalRooms" className={labelClasses}>
+                            Nombre de pièces
+                        </label>
+                        <div className={iconWrapperClasses}>
+                            <MdOutlineMeetingRoom size={20} />
+                        </div>
+                        <input
+                            type="number"
+                            id="totalRooms"
+                            name="totalRooms"
+                            value={formData.totalRooms || ''}
+                            onChange={onChange}
+                            className={inputClasses}
+                            placeholder="4"
+                            min="0"
+                        />
+                    </div>
+
+                    <div className="relative">
+                        <label htmlFor="bedrooms" className={labelClasses}>
+                            Chambres
+                        </label>
+                        <div className={iconWrapperClasses}>
+                            <MdOutlineKingBed size={20} />
+                        </div>
+                        <input
+                            type="number"
+                            id="bedrooms"
+                            name="bedrooms"
+                            value={formData.bedrooms || ''}
+                            onChange={onChange}
+                            className={inputClasses}
+                            placeholder="2"
+                            min="0"
+                        />
+                    </div>
+
+                    <div className="relative">
+                        <label htmlFor="bathrooms" className={labelClasses}>
+                            Salles de bain
+                        </label>
+                        <div className={iconWrapperClasses}>
+                            <MdOutlineBathtub size={20} />
+                        </div>
+                        <input
+                            type="number"
+                            id="bathrooms"
+                            name="bathrooms"
+                            value={formData.bathrooms || ''}
+                            onChange={onChange}
+                            className={inputClasses}
+                            placeholder="1"
+                            min="0"
+                        />
+                    </div>
+
+                    <div className="relative">
+                        <label htmlFor="constructionYear" className={labelClasses}>
+                            Année de construction
+                        </label>
+                        <div className={iconWrapperClasses}>
+                            <BsCalendarDate size={20} />
+                        </div>
+                        <input
+                            type="number"
+                            id="constructionYear"
+                            name="constructionYear"
+                            value={formData.constructionYear || ''}
+                            onChange={onChange}
+                            className={inputClasses}
+                            placeholder="2000"
+                            min="1800"
+                            max={new Date().getFullYear()}
+                        />
+                    </div>
+                </div>
+            </div>
+
+            <div className="bg-white dark:bg-gray-800 rounded-xl p-6 shadow-sm">
+                <div className="border-b dark:border-gray-700 pb-4 mb-6">
+                    <h3 className="text-xl font-semibold text-gray-900 dark:text-white">
+                        Description détaillée
+                    </h3>
+                    <p className="mt-1 text-sm text-gray-500 dark:text-gray-400">
+                        Ajoutez une description détaillée du bien
+                    </p>
                 </div>
 
-                <div className="flex items-center space-x-3">
-                    <input
-                        type="checkbox"
-                        id="petsAllowed"
-                        name="petsAllowed"
-                        checked={formData.petsAllowed}
-                        onChange={(e) => onChange({
-                            ...e,
-                            target: {
-                                ...e.target,
-                                name: 'petsAllowed',
-                                value: e.target.checked
-                            }
-                        } as any)}
-                        className="h-4 w-4 rounded border-gray-300 text-blue-600 focus:ring-blue-500"
-                    />
-                    <label htmlFor="petsAllowed" className="text-sm font-medium text-gray-700 dark:text-gray-300">
-                        Animaux autorisés
-                    </label>
+                <div className="space-y-6">
+                    <div>
+                        <label htmlFor="description" className={labelClasses}>
+                            Description générale
+                        </label>
+                        <textarea
+                            id="description"
+                            name="description"
+                            value={formData.description || ''}
+                            onChange={onChange}
+                            rows={4}
+                            className={textareaClasses}
+                            placeholder="Décrivez les caractéristiques principales du bien..."
+                        />
+                    </div>
+
+                    <div>
+                        <label htmlFor="additionalDetails" className={labelClasses}>
+                            Détails supplémentaires
+                        </label>
+                        <textarea
+                            id="additionalDetails"
+                            name="additionalDetails"
+                            value={formData.additionalDetails || ''}
+                            onChange={onChange}
+                            rows={4}
+                            className={textareaClasses}
+                            placeholder="Ajoutez des détails supplémentaires sur le bien..."
+                        />
+                    </div>
                 </div>
             </div>
         </div>

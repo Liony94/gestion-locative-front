@@ -25,6 +25,13 @@ export const usePropertyForm = () => {
         }));
     }, []);
 
+    const handleArrayChange = (name: string, value: string[]) => {
+        setFormData(prev => ({
+            ...prev,
+            [name]: value
+        }));
+    };
+
     const handleImageChange = useCallback((e: React.ChangeEvent<HTMLInputElement>) => {
         const files = e.target.files;
         if (!files) return;
@@ -200,6 +207,7 @@ export const usePropertyForm = () => {
         currentStep,
         setCurrentStep,
         handleChange,
+        handleArrayChange,
         handleSubmit,
         handleImageChange,
         selectedImages,

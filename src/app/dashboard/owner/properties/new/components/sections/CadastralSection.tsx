@@ -1,4 +1,7 @@
 import { PropertyFormData } from '../../types';
+import { HiOutlineDocumentText } from 'react-icons/hi';
+import { BsBuilding, BsCardChecklist } from 'react-icons/bs';
+import { FaRegAddressCard } from 'react-icons/fa';
 
 interface CadastralSectionProps {
     formData: PropertyFormData;
@@ -6,69 +9,72 @@ interface CadastralSectionProps {
 }
 
 export const CadastralSection = ({ formData, onChange }: CadastralSectionProps) => {
+    const inputClasses = "mt-1 block w-full rounded-lg border-gray-300 dark:border-gray-600 dark:bg-gray-800 shadow-sm focus:border-blue-500 focus:ring-blue-500 transition-all duration-200 pl-10";
+    const labelClasses = "block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1";
+    const iconClasses = "absolute left-3 top-[38px] text-gray-400 dark:text-gray-500";
+
     return (
-        <div className="grid grid-cols-1 gap-6 md:grid-cols-2">
-            <div>
-                <label htmlFor="lotNumber" className="block text-sm font-medium text-gray-700 dark:text-gray-300">
-                    Numéro de lot
-                </label>
-                <input
-                    type="text"
-                    id="lotNumber"
-                    name="lotNumber"
-                    value={formData.lotNumber || ''}
-                    onChange={onChange}
-                    className="mt-1 block w-full rounded-md border-gray-300 dark:border-gray-700 dark:bg-gray-900 shadow-sm focus:border-blue-500 focus:ring-blue-500"
-                />
-            </div>
+        <div className="space-y-6">
+            <div className="bg-white dark:bg-gray-800 rounded-xl p-6 shadow-sm">
+                <div className="border-b dark:border-gray-700 pb-4 mb-6">
+                    <h3 className="text-xl font-semibold text-gray-900 dark:text-white">
+                        Informations cadastrales
+                    </h3>
+                    <p className="mt-1 text-sm text-gray-500 dark:text-gray-400">
+                        Renseignez les informations cadastrales du bien
+                    </p>
+                </div>
 
-            <div>
-                <label htmlFor="coownershipUnits" className="block text-sm font-medium text-gray-700 dark:text-gray-300">
-                    Tantièmes de copropriété
-                </label>
-                <input
-                    type="text"
-                    id="coownershipUnits"
-                    name="coownershipUnits"
-                    value={formData.coownershipUnits || ''}
-                    onChange={onChange}
-                    className="mt-1 block w-full rounded-md border-gray-300 dark:border-gray-700 dark:bg-gray-900 shadow-sm focus:border-blue-500 focus:ring-blue-500"
-                />
-            </div>
+                <div className="grid grid-cols-1 gap-6 md:grid-cols-2">
+                    <div className="relative">
+                        <label htmlFor="lotNumber" className={labelClasses}>
+                            Numéro de lot
+                        </label>
+                        <BsCardChecklist className={iconClasses} size={20} />
+                        <input
+                            type="text"
+                            id="lotNumber"
+                            name="lotNumber"
+                            value={formData.lotNumber || ''}
+                            onChange={onChange}
+                            className={inputClasses}
+                            placeholder="Ex: Lot 123"
+                        />
+                    </div>
 
-            <div>
-                <label htmlFor="cadastralReference" className="block text-sm font-medium text-gray-700 dark:text-gray-300">
-                    Référence cadastrale
-                </label>
-                <input
-                    type="text"
-                    id="cadastralReference"
-                    name="cadastralReference"
-                    value={formData.cadastralReference || ''}
-                    onChange={onChange}
-                    className="mt-1 block w-full rounded-md border-gray-300 dark:border-gray-700 dark:bg-gray-900 shadow-sm focus:border-blue-500 focus:ring-blue-500"
-                />
-            </div>
+                    <div className="relative">
+                        <label htmlFor="coownershipUnits" className={labelClasses}>
+                            Tantièmes de copropriété
+                        </label>
+                        <BsBuilding className={iconClasses} size={20} />
+                        <input
+                            type="text"
+                            id="coownershipUnits"
+                            name="coownershipUnits"
+                            value={formData.coownershipUnits || ''}
+                            onChange={onChange}
+                            className={inputClasses}
+                            placeholder="Ex: 150/1000"
+                        />
+                    </div>
 
-            <div className="md:col-span-2">
-                <div className="bg-blue-50 dark:bg-blue-900/50 border border-blue-200 dark:border-blue-800 rounded-md p-4">
-                    <div className="flex">
-                        <div className="flex-shrink-0">
-                            <svg className="h-5 w-5 text-blue-400" viewBox="0 0 20 20" fill="currentColor">
-                                <path fillRule="evenodd" d="M18 10a8 8 0 11-16 0 8 8 0 0116 0zm-7-4a1 1 0 11-2 0 1 1 0 012 0zM9 9a1 1 0 000 2v3a1 1 0 001 1h1a1 1 0 100-2v-3a1 1 0 00-1-1H9z" clipRule="evenodd" />
-                            </svg>
-                        </div>
-                        <div className="ml-3">
-                            <h3 className="text-sm font-medium text-blue-800 dark:text-blue-200">
-                                Information
-                            </h3>
-                            <div className="mt-2 text-sm text-blue-700 dark:text-blue-300">
-                                <p>
-                                    Les informations cadastrales sont importantes pour la gestion administrative et fiscale de votre bien.
-                                    Vous pouvez les trouver sur votre acte de propriété ou sur le site du cadastre.
-                                </p>
-                            </div>
-                        </div>
+                    <div className="relative md:col-span-2">
+                        <label htmlFor="cadastralReference" className={labelClasses}>
+                            Référence cadastrale
+                        </label>
+                        <HiOutlineDocumentText className={iconClasses} size={20} />
+                        <input
+                            type="text"
+                            id="cadastralReference"
+                            name="cadastralReference"
+                            value={formData.cadastralReference || ''}
+                            onChange={onChange}
+                            className={inputClasses}
+                            placeholder="Ex: Section B 1234"
+                        />
+                        <p className="mt-2 text-sm text-gray-500 dark:text-gray-400">
+                            La référence cadastrale est disponible sur votre acte de propriété ou sur cadastre.gouv.fr
+                        </p>
                     </div>
                 </div>
             </div>

@@ -1,4 +1,9 @@
+import React from 'react';
 import { PropertyFormData } from '../../types';
+import { HiOutlineUsers, HiOutlineDocumentText, HiOutlineGlobe, HiOutlineCalendar } from 'react-icons/hi';
+import { BsHouseDoor, BsShieldCheck, BsEyeFill, BsEyeSlashFill, BsFileEarmarkText, BsCalendarCheck, BsCalendarX } from 'react-icons/bs';
+import { MdOutlineDescription } from 'react-icons/md';
+import { IoDocumentTextOutline } from 'react-icons/io5';
 
 interface RentalSectionProps {
     formData: PropertyFormData;
@@ -6,100 +11,131 @@ interface RentalSectionProps {
 }
 
 export const RentalSection = ({ formData, onChange }: RentalSectionProps) => {
+    const inputClasses = "block w-full pl-10 pr-3 py-2 text-sm rounded-lg border-gray-300 dark:border-gray-600 dark:bg-gray-700 focus:ring-blue-500 focus:border-blue-500 transition-colors duration-200";
+    const selectClasses = "block w-full pl-10 pr-3 py-2 text-sm rounded-lg border-gray-300 dark:border-gray-600 dark:bg-gray-700 focus:ring-blue-500 focus:border-blue-500 transition-colors duration-200";
+    const labelClasses = "block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1";
+    const iconWrapperClasses = "absolute left-3 top-[2.1rem] text-gray-400 dark:text-gray-500 pointer-events-none";
+    const textareaClasses = "block w-full px-3 py-2 text-sm rounded-lg border-gray-300 dark:border-gray-600 dark:bg-gray-700 focus:ring-blue-500 focus:border-blue-500 transition-colors duration-200";
+
     return (
-        <div className="grid grid-cols-1 gap-6 md:grid-cols-2">
-            <div>
-                <label htmlFor="rentExcludingCharges" className="block text-sm font-medium text-gray-700 dark:text-gray-300">
-                    Loyer hors charges (€)
-                </label>
-                <input
-                    type="number"
-                    id="rentExcludingCharges"
-                    name="rentExcludingCharges"
-                    required
-                    min="0"
-                    step="0.01"
-                    value={formData.rentExcludingCharges}
-                    onChange={onChange}
-                    className="mt-1 block w-full rounded-md border-gray-300 dark:border-gray-700 dark:bg-gray-900 shadow-sm focus:border-blue-500 focus:ring-blue-500"
-                />
-            </div>
+        <div className="space-y-8">
+            <div className="bg-white dark:bg-gray-800 rounded-xl p-6 shadow-sm">
+                <div className="border-b dark:border-gray-700 pb-4 mb-6">
+                    <h3 className="text-xl font-semibold text-gray-900 dark:text-white">
+                        Informations de location
+                    </h3>
+                    <p className="mt-1 text-sm text-gray-500 dark:text-gray-400">
+                        Renseignez les détails de la location
+                    </p>
+                </div>
 
-            <div>
-                <label htmlFor="charges" className="block text-sm font-medium text-gray-700 dark:text-gray-300">
-                    Charges (€)
-                </label>
-                <input
-                    type="number"
-                    id="charges"
-                    name="charges"
-                    min="0"
-                    step="0.01"
-                    value={formData.charges || ''}
-                    onChange={onChange}
-                    className="mt-1 block w-full rounded-md border-gray-300 dark:border-gray-700 dark:bg-gray-900 shadow-sm focus:border-blue-500 focus:ring-blue-500"
-                />
-            </div>
-
-            <div>
-                <label htmlFor="paymentFrequency" className="block text-sm font-medium text-gray-700 dark:text-gray-300">
-                    Fréquence de paiement
-                </label>
-                <select
-                    id="paymentFrequency"
-                    name="paymentFrequency"
-                    value={formData.paymentFrequency || ''}
-                    onChange={onChange}
-                    className="mt-1 block w-full rounded-md border-gray-300 dark:border-gray-700 dark:bg-gray-900 shadow-sm focus:border-blue-500 focus:ring-blue-500"
-                >
-                    <option value="">Sélectionner une fréquence</option>
-                    <option value="MONTHLY">Mensuel</option>
-                    <option value="QUARTERLY">Trimestriel</option>
-                    <option value="SEMI_ANNUAL">Semestriel</option>
-                    <option value="ANNUAL">Annuel</option>
-                </select>
-            </div>
-
-            <div>
-                <label htmlFor="isAvailableForRent" className="flex items-center space-x-3">
-                    <input
-                        type="checkbox"
-                        id="isAvailableForRent"
-                        name="isAvailableForRent"
-                        checked={formData.isAvailableForRent}
-                        onChange={(e) => onChange({
-                            ...e,
-                            target: {
-                                ...e.target,
-                                name: 'isAvailableForRent',
-                                value: e.target.checked
-                            }
-                        } as any)}
-                        className="h-4 w-4 rounded border-gray-300 text-blue-600 focus:ring-blue-500"
-                    />
-                    <span className="text-sm font-medium text-gray-700 dark:text-gray-300">
-                        Disponible à la location
-                    </span>
-                </label>
-            </div>
-
-            <div className="md:col-span-2">
-                <div className="bg-yellow-50 dark:bg-yellow-900/50 border border-yellow-200 dark:border-yellow-800 rounded-md p-4">
-                    <div className="flex">
-                        <div className="flex-shrink-0">
-                            <svg className="h-5 w-5 text-yellow-400" viewBox="0 0 20 20" fill="currentColor">
-                                <path fillRule="evenodd" d="M8.257 3.099c.765-1.36 2.722-1.36 3.486 0l5.58 9.92c.75 1.334-.213 2.98-1.742 2.98H4.42c-1.53 0-2.493-1.646-1.743-2.98l5.58-9.92zM11 13a1 1 0 11-2 0 1 1 0 012 0zm-1-8a1 1 0 00-1 1v3a1 1 0 002 0V6a1 1 0 00-1-1z" clipRule="evenodd" />
-                            </svg>
+                <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+                    <div className="relative">
+                        <label htmlFor="rentalStartDate" className={labelClasses}>
+                            Date de début
+                        </label>
+                        <div className={iconWrapperClasses}>
+                            <BsCalendarCheck size={20} />
                         </div>
-                        <div className="ml-3">
-                            <h3 className="text-sm font-medium text-yellow-800 dark:text-yellow-200">
-                                Information importante
-                            </h3>
-                            <div className="mt-2 text-sm text-yellow-700 dark:text-yellow-300">
-                                <p>
-                                    Le montant du loyer et des charges sera utilisé pour générer automatiquement les échéanciers de paiement.
-                                </p>
+                        <input
+                            type="date"
+                            id="rentalStartDate"
+                            name="rentalStartDate"
+                            value={formData.rentalStartDate || ''}
+                            onChange={onChange}
+                            className={inputClasses}
+                        />
+                    </div>
+
+                    <div className="relative">
+                        <label htmlFor="rentalEndDate" className={labelClasses}>
+                            Date de fin
+                        </label>
+                        <div className={iconWrapperClasses}>
+                            <BsCalendarX size={20} />
+                        </div>
+                        <input
+                            type="date"
+                            id="rentalEndDate"
+                            name="rentalEndDate"
+                            value={formData.rentalEndDate || ''}
+                            onChange={onChange}
+                            className={inputClasses}
+                        />
+                    </div>
+
+                    <div className="relative">
+                        <label htmlFor="leaseType" className={labelClasses}>
+                            Type de bail
+                        </label>
+                        <div className={iconWrapperClasses}>
+                            <HiOutlineDocumentText size={20} />
+                        </div>
+                        <select
+                            id="leaseType"
+                            name="leaseType"
+                            value={formData.leaseType || ''}
+                            onChange={onChange}
+                            className={selectClasses}
+                        >
+                            <option value="">Sélectionnez un type</option>
+                            <option value="FURNISHED">Meublé</option>
+                            <option value="UNFURNISHED">Non meublé</option>
+                            <option value="COMMERCIAL">Commercial</option>
+                            <option value="PROFESSIONAL">Professionnel</option>
+                        </select>
+                    </div>
+                </div>
+            </div>
+
+            <div className="bg-white dark:bg-gray-800 rounded-xl p-6 shadow-sm">
+                <div className="border-b dark:border-gray-700 pb-4 mb-6">
+                    <h3 className="text-xl font-semibold text-gray-900 dark:text-white">
+                        Documents et conditions
+                    </h3>
+                    <p className="mt-1 text-sm text-gray-500 dark:text-gray-400">
+                        Ajoutez les détails des documents et conditions de location
+                    </p>
+                </div>
+
+                <div className="space-y-6">
+                    <div>
+                        <label htmlFor="leaseTerms" className={labelClasses}>
+                            Conditions du bail
+                        </label>
+                        <div className="relative">
+                            <div className={iconWrapperClasses}>
+                                <BsFileEarmarkText size={20} />
                             </div>
+                            <textarea
+                                id="leaseTerms"
+                                name="leaseTerms"
+                                rows={4}
+                                value={formData.leaseTerms || ''}
+                                onChange={onChange}
+                                className={textareaClasses}
+                                placeholder="Détaillez les conditions principales du bail..."
+                            />
+                        </div>
+                    </div>
+
+                    <div>
+                        <label htmlFor="specialConditions" className={labelClasses}>
+                            Conditions particulières
+                        </label>
+                        <div className="relative">
+                            <div className={iconWrapperClasses}>
+                                <MdOutlineDescription size={20} />
+                            </div>
+                            <textarea
+                                id="specialConditions"
+                                name="specialConditions"
+                                rows={4}
+                                value={formData.specialConditions || ''}
+                                onChange={onChange}
+                                className={textareaClasses}
+                                placeholder="Ajoutez des conditions particulières si nécessaire..."
+                            />
                         </div>
                     </div>
                 </div>

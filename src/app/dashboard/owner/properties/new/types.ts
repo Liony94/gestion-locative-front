@@ -1,12 +1,20 @@
 export enum PropertyType {
-    APARTMENT = 'APARTMENT',
     HOUSE = 'HOUSE',
-    STUDIO = 'STUDIO',
-    LAND = 'LAND',
+    APARTMENT = 'APARTMENT',
     COMMERCIAL = 'COMMERCIAL',
+    LAND = 'LAND',
     PARKING = 'PARKING',
     OTHER = 'OTHER'
 }
+
+export const PropertyTypeLabels: Record<PropertyType, string> = {
+    [PropertyType.HOUSE]: 'Maison',
+    [PropertyType.APARTMENT]: 'Appartement',
+    [PropertyType.COMMERCIAL]: 'Local commercial',
+    [PropertyType.LAND]: 'Terrain',
+    [PropertyType.PARKING]: 'Parking',
+    [PropertyType.OTHER]: 'Autre'
+};
 
 export enum BuildingType {
     COLLECTIVE = 'COLLECTIVE',

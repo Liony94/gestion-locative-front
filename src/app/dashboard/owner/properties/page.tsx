@@ -6,7 +6,7 @@ import PropertyCard from './components/PropertyCard';
 
 interface Property {
     id: number;
-    title: string;
+    identifier: string;
     description: string;
     price: number;
     address: string;

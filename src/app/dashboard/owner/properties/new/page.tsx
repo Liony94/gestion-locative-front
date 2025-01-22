@@ -7,6 +7,8 @@ import CreatePaymentScheduleModal from '../../accounting/components/CreatePaymen
 import { useState, useEffect } from 'react';
 import { Property } from '@/types/property';
 import { User } from '@/types/user';
+import React from 'react';
+import { PropertyFormData } from './types';
 
 export default function NewPropertyPage() {
     const router = useRouter();
@@ -18,6 +20,7 @@ export default function NewPropertyPage() {
         error,
         success,
         handleChange,
+        handleArrayChange,
         handleSubmit,
         handleImageChange,
         previewUrls,
@@ -83,6 +86,7 @@ export default function NewPropertyPage() {
                         <PropertyForm
                             formData={formData}
                             onChange={handleChange}
+                            onArrayChange={handleArrayChange}
                             onImageChange={handleImageChange}
                             previewUrls={previewUrls}
                             onRemoveImage={removeImage}

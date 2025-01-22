@@ -1,4 +1,4 @@
-import { PropertyFormData, PropertyType, BuildingType, BuildingLegalStatus, VisibilityStatus } from '../types';
+import { PropertyFormData, PropertyType, PropertyTypeLabels, BuildingType, BuildingLegalStatus, VisibilityStatus } from '../types';
 import { Tab } from '@headlessui/react';
 import { AddressSection } from './sections/AddressSection';
 import { RentalSection } from './sections/RentalSection';
@@ -7,29 +7,64 @@ import { AmenitiesSection } from './sections/AmenitiesSection';
 import { FinancialSection } from './sections/FinancialSection';
 import { CadastralSection } from './sections/CadastralSection';
 import { VisibilitySection } from './sections/VisibilitySection';
+import { HiOutlineHome, HiOutlineTag, HiOutlineColorSwatch, HiOutlineLocationMarker, HiOutlineDocumentText, HiOutlineCog, HiOutlineMap, HiOutlineCurrencyEuro, HiOutlineEye } from 'react-icons/hi';
 
 interface PropertyFormProps {
     formData: PropertyFormData;
     onChange: (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement | HTMLSelectElement>) => void;
+    onArrayChange: (name: string, value: string[]) => void;
     onImageChange: (e: React.ChangeEvent<HTMLInputElement>) => void;
     previewUrls?: string[];
     onRemoveImage?: (index: number) => void;
 }
 
 const formSections = [
-    { name: 'Informations générales', icon: 'M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z' },
-    { name: 'Adresse', icon: 'M17.657 16.657L13.414 20.9a1.998 1.998 0 01-2.827 0l-4.244-4.243a8 8 0 1111.314 0z' },
-    { name: 'Location', icon: 'M12 8c-1.657 0-3 .895-3 2s1.343 2 3 2 3 .895 3 2-1.343 2-3 2m0-8c1.11 0 2.08.402 2.599 1M12 8V7m0 1v8m0 0v1m0-1c-1.11 0-2.08-.402-2.599-1M21 12a9 9 0 11-18 0 9 9 0 0118 0z' },
-    { name: 'Description', icon: 'M7 8h10M7 12h4m1 8l-4-4H5a2 2 0 01-2-2V6a2 2 0 012-2h14a2 2 0 012 2v8a2 2 0 01-2 2h-3l-4 4z' },
-    { name: 'Équipements', icon: 'M5 3v4M3 5h4M6 17v4m-2-2h4m5-16l2.286 6.857L21 12l-5.714 2.143L13 21l-2.286-6.857L5 12l5.714-2.143L13 3z' },
-    { name: 'Cadastre', icon: 'M9 20l-5.447-2.724A1 1 0 013 16.382V5.618a1 1 0 011.447-.894L9 7m0 13l6-3m-6 3V7m6 10l4.553 2.276A1 1 0 0021 18.382V7.618a1 1 0 00-.553-.894L15 4m0 13V4m0 0L9 7' },
-    { name: 'Finances', icon: 'M12 8c-1.657 0-3 .895-3 2s1.343 2 3 2 3 .895 3 2-1.343 2-3 2m0-8c1.11 0 2.08.402 2.599 1M12 8V7m0 1v8m0 0v1m0-1c-1.11 0-2.08-.402-2.599-1M21 12a9 9 0 11-18 0 9 9 0 0118 0z' },
-    { name: 'Visibilité', icon: 'M15 12a3 3 0 11-6 0 3 3 0 016 0z' },
+    {
+        name: 'Informations générales',
+        icon: <HiOutlineHome className="w-5 h-5" />,
+        description: 'Identifiant, type et couleur'
+    },
+    {
+        name: 'Adresse',
+        icon: <HiOutlineLocationMarker className="w-5 h-5" />,
+        description: 'Localisation du bien'
+    },
+    {
+        name: 'Location',
+        icon: <HiOutlineTag className="w-5 h-5" />,
+        description: 'Conditions de location'
+    },
+    {
+        name: 'Description',
+        icon: <HiOutlineDocumentText className="w-5 h-5" />,
+        description: 'Caractéristiques du bien'
+    },
+    {
+        name: 'Équipements',
+        icon: <HiOutlineCog className="w-5 h-5" />,
+        description: 'Équipements disponibles'
+    },
+    {
+        name: 'Cadastre',
+        icon: <HiOutlineMap className="w-5 h-5" />,
+        description: 'Informations cadastrales'
+    },
+    {
+        name: 'Finances',
+        icon: <HiOutlineCurrencyEuro className="w-5 h-5" />,
+        description: 'Informations financières'
+    },
+    {
+        name: 'Visibilité',
+        icon: <HiOutlineEye className="w-5 h-5" />,
+        description: 'Paramètres de visibilité'
+    }
 ];
 
 export const PropertyForm = ({
     formData,
     onChange,
+    onArrayChange,
     onImageChange,
     previewUrls = [],
     onRemoveImage
@@ -37,34 +72,25 @@ export const PropertyForm = ({
     return (
         <div className="w-full px-2 py-16 sm:px-0">
             <Tab.Group>
-                <Tab.List className="flex space-x-1 rounded-xl bg-blue-900/20 p-1 overflow-x-auto">
+                <Tab.List className="flex flex-wrap gap-2 p-4 bg-white dark:bg-gray-800 rounded-xl shadow-sm mb-6">
                     {formSections.map((section) => (
                         <Tab
                             key={section.name}
                             className={({ selected }) =>
-                                `flex-shrink-0 rounded-lg py-2.5 px-4 text-sm font-medium leading-5 text-blue-700
-                                ring-white ring-opacity-60 ring-offset-2 ring-offset-blue-400 focus:outline-none focus:ring-2
+                                `flex items-center gap-2 px-4 py-2.5 rounded-lg transition-all duration-200 outline-none
                                 ${selected
-                                    ? 'bg-white shadow'
-                                    : 'text-blue-100 hover:bg-white/[0.12] hover:text-white'
-                                }`
+                                    ? 'bg-blue-600 text-white shadow-md hover:bg-blue-700'
+                                    : 'text-gray-600 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-700'
+                                }
+                                group relative`
                             }
                         >
-                            <div className="flex items-center space-x-2">
-                                <svg
-                                    className="w-5 h-5"
-                                    fill="none"
-                                    stroke="currentColor"
-                                    viewBox="0 0 24 24"
-                                >
-                                    <path
-                                        strokeLinecap="round"
-                                        strokeLinejoin="round"
-                                        strokeWidth={2}
-                                        d={section.icon}
-                                    />
-                                </svg>
-                                <span>{section.name}</span>
+                            <div className="flex items-center gap-2">
+                                {section.icon}
+                                <span className="text-sm font-medium whitespace-nowrap">{section.name}</span>
+                            </div>
+                            <div className="absolute bottom-full left-1/2 transform -translate-x-1/2 mb-2 px-2 py-1 bg-gray-900 text-white text-xs rounded opacity-0 group-hover:opacity-100 transition-opacity duration-200 whitespace-nowrap pointer-events-none">
+                                {section.description}
                             </div>
                         </Tab>
                     ))}
@@ -73,52 +99,76 @@ export const PropertyForm = ({
                 <Tab.Panels className="mt-6">
                     {/* Informations générales */}
                     <Tab.Panel>
-                        <div className="grid grid-cols-1 gap-6 md:grid-cols-2">
-                            <div>
-                                <label htmlFor="identifier" className="block text-sm font-medium text-gray-700 dark:text-gray-300">
-                                    Identifiant unique
-                                </label>
-                                <input
-                                    type="text"
-                                    id="identifier"
-                                    name="identifier"
-                                    required
-                                    value={formData.identifier}
-                                    onChange={onChange}
-                                    className="mt-1 block w-full rounded-md border-gray-300 dark:border-gray-700 dark:bg-gray-900 shadow-sm focus:border-blue-500 focus:ring-blue-500"
-                                />
+                        <div className="bg-white dark:bg-gray-800 rounded-xl p-6 shadow-sm">
+                            <div className="border-b dark:border-gray-700 pb-4 mb-6">
+                                <h3 className="text-xl font-semibold text-gray-900 dark:text-white">
+                                    Informations générales
+                                </h3>
+                                <p className="mt-1 text-sm text-gray-500 dark:text-gray-400">
+                                    Renseignez les informations de base du bien
+                                </p>
                             </div>
 
-                            <div>
-                                <label htmlFor="color" className="block text-sm font-medium text-gray-700 dark:text-gray-300">
-                                    Couleur
-                                </label>
-                                <input
-                                    type="color"
-                                    id="color"
-                                    name="color"
-                                    value={formData.color || '#000000'}
-                                    onChange={onChange}
-                                    className="mt-1 block w-full rounded-md border-gray-300 dark:border-gray-700 dark:bg-gray-900 shadow-sm focus:border-blue-500 focus:ring-blue-500 h-10"
-                                />
-                            </div>
+                            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+                                <div className="relative">
+                                    <label htmlFor="identifier" className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
+                                        Identifiant unique
+                                    </label>
+                                    <div className="absolute left-3 top-[2.1rem] text-gray-400 dark:text-gray-500 pointer-events-none">
+                                        <HiOutlineTag size={20} />
+                                    </div>
+                                    <input
+                                        type="text"
+                                        id="identifier"
+                                        name="identifier"
+                                        required
+                                        value={formData.identifier}
+                                        onChange={onChange}
+                                        className="block w-full pl-10 pr-3 py-2 text-sm rounded-lg border-gray-300 dark:border-gray-600 dark:bg-gray-700 focus:ring-blue-500 focus:border-blue-500 transition-colors duration-200"
+                                        placeholder="ID-001"
+                                    />
+                                </div>
 
-                            <div>
-                                <label htmlFor="type" className="block text-sm font-medium text-gray-700 dark:text-gray-300">
-                                    Type de bien
-                                </label>
-                                <select
-                                    id="type"
-                                    name="type"
-                                    required
-                                    value={formData.type}
-                                    onChange={onChange}
-                                    className="mt-1 block w-full rounded-md border-gray-300 dark:border-gray-700 dark:bg-gray-900 shadow-sm focus:border-blue-500 focus:ring-blue-500"
-                                >
-                                    {Object.entries(PropertyType).map(([key, value]) => (
-                                        <option key={key} value={value}>{key}</option>
-                                    ))}
-                                </select>
+                                <div className="relative">
+                                    <label htmlFor="type" className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
+                                        Type de bien
+                                    </label>
+                                    <div className="absolute left-3 top-[2.1rem] text-gray-400 dark:text-gray-500 pointer-events-none">
+                                        <HiOutlineTag size={20} />
+                                    </div>
+                                    <select
+                                        id="type"
+                                        name="type"
+                                        required
+                                        value={formData.type}
+                                        onChange={onChange}
+                                        className="block w-full pl-10 pr-3 py-2 text-sm rounded-lg border-gray-300 dark:border-gray-600 dark:bg-gray-700 focus:ring-blue-500 focus:border-blue-500 transition-colors duration-200"
+                                    >
+                                        <option value="">Sélectionnez un type</option>
+                                        {Object.values(PropertyType).map((value) => (
+                                            <option key={value} value={value}>
+                                                {PropertyTypeLabels[value]}
+                                            </option>
+                                        ))}
+                                    </select>
+                                </div>
+
+                                <div className="relative">
+                                    <label htmlFor="color" className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
+                                        Couleur
+                                    </label>
+                                    <div className="absolute left-3 top-[2.1rem] text-gray-400 dark:text-gray-500 pointer-events-none">
+                                        <HiOutlineColorSwatch size={20} />
+                                    </div>
+                                    <input
+                                        type="color"
+                                        id="color"
+                                        name="color"
+                                        value={formData.color || '#000000'}
+                                        onChange={onChange}
+                                        className="block w-full pl-10 pr-3 py-2 text-sm rounded-lg border-gray-300 dark:border-gray-600 dark:bg-gray-700 focus:ring-blue-500 focus:border-blue-500 transition-colors duration-200 h-10"
+                                    />
+                                </div>
                             </div>
                         </div>
                     </Tab.Panel>
@@ -140,7 +190,11 @@ export const PropertyForm = ({
 
                     {/* Équipements */}
                     <Tab.Panel>
-                        <AmenitiesSection formData={formData} onChange={onChange} />
+                        <AmenitiesSection
+                            formData={formData}
+                            onChange={onChange}
+                            onArrayChange={onArrayChange}
+                        />
                     </Tab.Panel>
 
                     {/* Cadastre */}

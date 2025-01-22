@@ -1,4 +1,8 @@
+import React, { ReactElement } from 'react';
 import { PropertyFormData, VisibilityStatus } from '../../types';
+import { HiOutlineEye, HiOutlineEyeOff, HiOutlinePhone, HiOutlineLocationMarker, HiOutlineHome } from 'react-icons/hi';
+import { BsHouseDoor, BsShieldCheck, BsLock, BsUnlock } from 'react-icons/bs';
+import { IoMdInformationCircleOutline } from 'react-icons/io';
 
 interface VisibilitySectionProps {
     formData: PropertyFormData;
@@ -8,6 +12,86 @@ interface VisibilitySectionProps {
     onRemoveImage?: (index: number) => void;
 }
 
+const visibilityLabels: Record<VisibilityStatus, string> = {
+    [VisibilityStatus.PUBLIC]: 'Public',
+    [VisibilityStatus.PRIVATE]: 'Privé'
+};
+
+const renderVisibilityCard = (
+    title: string,
+    description: string,
+    value: VisibilityStatus,
+    name: string,
+    onChange: (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement | HTMLSelectElement>) => void,
+    icon: ReactElement
+): ReactElement => {
+    const getStatusMessage = (status: VisibilityStatus) => {
+        switch (status) {
+            case VisibilityStatus.PUBLIC:
+                return {
+                    message: "Cette information est visible par tous les utilisateurs",
+                    bgColor: "bg-green-50 dark:bg-green-900/20",
+                    textColor: "text-green-700 dark:text-green-300",
+                    borderColor: "border-green-200 dark:border-green-800"
+                };
+            case VisibilityStatus.PRIVATE:
+                return {
+                    message: "Cette information est visible uniquement par vous",
+                    bgColor: "bg-red-50 dark:bg-red-900/20",
+                    textColor: "text-red-700 dark:text-red-300",
+                    borderColor: "border-red-200 dark:border-red-800"
+                };
+            default:
+                return {
+                    message: "Cette information est visible par certains utilisateurs",
+                    bgColor: "bg-blue-50 dark:bg-blue-900/20",
+                    textColor: "text-blue-700 dark:text-blue-300",
+                    borderColor: "border-blue-200 dark:border-blue-800"
+                };
+        }
+    };
+
+    const status = getStatusMessage(value);
+
+    return (
+        <div className="bg-white dark:bg-gray-800 rounded-lg p-6 shadow-sm">
+            <div className="flex items-start space-x-4">
+                <div className="flex-shrink-0 mt-1">
+                    <div className={`p-2 ${status.bgColor} rounded-lg`}>
+                        {icon}
+                    </div>
+                </div>
+                <div className="flex-grow">
+                    <h4 className="text-lg font-medium text-gray-900 dark:text-white mb-1">{title}</h4>
+                    <p className="text-sm text-gray-500 dark:text-gray-400 mb-4">{description}</p>
+                    <div className="flex items-center space-x-4 mb-4">
+                        {Object.values(VisibilityStatus).map((status) => (
+                            <label key={status} className="inline-flex items-center">
+                                <input
+                                    type="radio"
+                                    name={name}
+                                    value={status}
+                                    checked={value === status}
+                                    onChange={onChange}
+                                    className="form-radio h-4 w-4 text-blue-600 dark:text-blue-500 border-gray-300 dark:border-gray-600 focus:ring-blue-500"
+                                />
+                                <span className="ml-2 text-sm text-gray-700 dark:text-gray-300">
+                                    {visibilityLabels[status]}
+                                </span>
+                            </label>
+                        ))}
+                    </div>
+                    <div className={`mt-2 p-3 rounded-lg ${status.bgColor} ${status.borderColor} border`}>
+                        <p className={`text-sm ${status.textColor}`}>
+                            {status.message}
+                        </p>
+                    </div>
+                </div>
+            </div>
+        </div>
+    );
+};
+
 export const VisibilitySection = ({
     formData,
     onChange,
@@ -15,63 +99,71 @@ export const VisibilitySection = ({
     previewUrls = [],
     onRemoveImage
 }: VisibilitySectionProps) => {
+    const selectClasses = "mt-1 block w-full rounded-lg border-gray-300 dark:border-gray-600 dark:bg-gray-800 shadow-sm focus:border-blue-500 focus:ring-blue-500 transition-all duration-200 pl-10";
+    const labelClasses = "block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1";
+    const iconClasses = "absolute left-3 top-[38px] text-gray-400 dark:text-gray-500";
+
     return (
-        <div className="space-y-8">
-            {/* Paramètres de visibilité */}
-            <div>
-                <h3 className="text-lg font-medium text-gray-900 dark:text-white mb-6">
-                    Paramètres de visibilité
-                </h3>
-                <div className="grid grid-cols-1 gap-6 md:grid-cols-2">
-                    <div>
-                        <label htmlFor="propertyVisibility" className="block text-sm font-medium text-gray-700 dark:text-gray-300">
-                            Visibilité du bien
-                        </label>
-                        <select
-                            id="propertyVisibility"
-                            name="propertyVisibility"
-                            value={formData.propertyVisibility}
-                            onChange={onChange}
-                            className="mt-1 block w-full rounded-md border-gray-300 dark:border-gray-700 dark:bg-gray-900 shadow-sm focus:border-blue-500 focus:ring-blue-500"
-                        >
-                            {Object.entries(VisibilityStatus).map(([key, value]) => (
-                                <option key={key} value={value}>{key}</option>
-                            ))}
-                        </select>
+        <div className="space-y-6">
+            <div className="bg-white dark:bg-gray-800 rounded-xl p-6 shadow-sm">
+                <div className="border-b dark:border-gray-700 pb-4 mb-6">
+                    <h3 className="text-xl font-semibold text-gray-900 dark:text-white">
+                        Paramètres de visibilité
+                    </h3>
+                    <p className="mt-1 text-sm text-gray-500 dark:text-gray-400">
+                        Configurez la visibilité de votre bien et de ses informations
+                    </p>
+                </div>
+
+                <div className="space-y-6">
+                    {/* Paramètres de visibilité */}
+                    <div className="grid gap-6">
+                        {renderVisibilityCard(
+                            'Visibilité du bien',
+                            'Contrôlez qui peut voir les informations générales de votre bien',
+                            formData.propertyVisibility,
+                            'propertyVisibility',
+                            onChange,
+                            <HiOutlineHome className="h-6 w-6 text-blue-600 dark:text-blue-500" />
+                        )}
+
+                        {renderVisibilityCard(
+                            'Visibilité de l\'adresse',
+                            'Définissez qui peut voir l\'adresse complète du bien',
+                            formData.addressVisibility,
+                            'addressVisibility',
+                            onChange,
+                            <HiOutlineLocationMarker className="h-6 w-6 text-blue-600 dark:text-blue-500" />
+                        )}
+
+                        {renderVisibilityCard(
+                            'Visibilité du téléphone',
+                            'Choisissez qui peut voir votre numéro de téléphone',
+                            formData.phoneVisibility,
+                            'phoneVisibility',
+                            onChange,
+                            <HiOutlinePhone className="h-6 w-6 text-blue-600 dark:text-blue-500" />
+                        )}
                     </div>
 
-                    <div>
-                        <label htmlFor="addressVisibility" className="block text-sm font-medium text-gray-700 dark:text-gray-300">
-                            Visibilité de l'adresse
-                        </label>
-                        <select
-                            id="addressVisibility"
-                            name="addressVisibility"
-                            value={formData.addressVisibility}
-                            onChange={onChange}
-                            className="mt-1 block w-full rounded-md border-gray-300 dark:border-gray-700 dark:bg-gray-900 shadow-sm focus:border-blue-500 focus:ring-blue-500"
-                        >
-                            {Object.entries(VisibilityStatus).map(([key, value]) => (
-                                <option key={key} value={value}>{key}</option>
-                            ))}
-                        </select>
-                    </div>
-
-                    <div>
-                        <label htmlFor="phoneVisibility" className="block text-sm font-medium text-gray-700 dark:text-gray-300">
-                            Visibilité du téléphone
-                        </label>
-                        <select
-                            id="phoneVisibility"
-                            name="phoneVisibility"
-                            value={formData.phoneVisibility}
-                            onChange={onChange}
-                            className="mt-1 block w-full rounded-md border-gray-300 dark:border-gray-700 dark:bg-gray-900 shadow-sm focus:border-blue-500 focus:ring-blue-500"
-                        >
-                            {Object.entries(VisibilityStatus).map(([key, value]) => (
-                                <option key={key} value={value}>{key}</option>
-                            ))}
-                        </select>
+                    {/* Note d'information */}
+                    <div className="mt-6 bg-blue-50 dark:bg-blue-900/20 border border-blue-200 dark:border-blue-800 rounded-lg p-4">
+                        <div className="flex">
+                            <div className="flex-shrink-0">
+                                <IoMdInformationCircleOutline className="h-5 w-5 text-blue-400" />
+                            </div>
+                            <div className="ml-3">
+                                <h3 className="text-sm font-medium text-blue-800 dark:text-blue-200">
+                                    À propos de la visibilité
+                                </h3>
+                                <div className="mt-2 text-sm text-blue-700 dark:text-blue-300">
+                                    <p>
+                                        La visibilité "Restreinte" permet de contrôler précisément qui peut voir vos informations.
+                                        Les informations privées ne seront visibles que par vous.
+                                    </p>
+                                </div>
+                            </div>
+                        </div>
                     </div>
                 </div>
             </div>

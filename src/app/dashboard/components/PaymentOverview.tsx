@@ -19,24 +19,22 @@ export default function PaymentOverview() {
     useEffect(() => {
         const fetchPayments = async () => {
             try {
-                const schedulesResponse = await api.get('/payments/schedules');
+                console.log('Début du chargement des paiements...');
+                const response = await api.get('/payments/schedules');
+                console.log('Réponse brute de l\'API:', response);
+
+                const schedulesResponse = response.data;
+                console.log('Données des échéanciers:', schedulesResponse);
+
+                if (!schedulesResponse) {
+                    throw new Error('Aucune donnée reçue de l\'API');
+                }
+
                 const allPayments: Payment[] = [];
 
-                if (schedulesResponse && Array.isArray(schedulesResponse)) {
-                    console.log('Réponse API brute:', JSON.stringify(schedulesResponse, null, 2));
-                    console.log('Nombre d\'échéanciers:', schedulesResponse.length);
-
+                if (Array.isArray(schedulesResponse)) {
                     schedulesResponse.forEach((schedule: PaymentSchedule) => {
                         if (schedule?.payments && Array.isArray(schedule.payments)) {
-                            console.log(`Échéancier ${schedule.id} - Paiements:`,
-                                schedule.payments.map(p => ({
-                                    id: p.id,
-                                    status: p.status,
-                                    amount: p.amount,
-                                    dueDate: p.dueDate
-                                }))
-                            );
-
                             allPayments.push(...schedule.payments.map(payment => ({
                                 ...payment,
                                 paymentSchedule: {
@@ -46,20 +44,16 @@ export default function PaymentOverview() {
                             })));
                         }
                     });
+                } else {
+                    throw new Error('Format de réponse invalide');
                 }
 
-                const latePayments = allPayments.filter(p => p.status === 'LATE');
-                console.log('Paiements en retard:', latePayments.map(p => ({
-                    id: p.id,
-                    status: p.status,
-                    amount: p.amount,
-                    dueDate: p.dueDate
-                })));
-
+                console.log('Nombre total de paiements chargés:', allPayments.length);
                 setPayments(allPayments);
-            } catch (err) {
-                console.error('Erreur lors du chargement des paiements:', err);
-                setError('Erreur lors du chargement des données');
+            } catch (err: any) {
+                console.error('Erreur détaillée:', err);
+                const errorMessage = err.response?.data?.message || err.message || 'Erreur inconnue';
+                setError(`Erreur lors du chargement des données: ${errorMessage}`);
             } finally {
                 setIsLoading(false);
             }

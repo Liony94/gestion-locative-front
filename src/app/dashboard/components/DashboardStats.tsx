@@ -8,51 +8,98 @@ interface DashboardStatsProps {
 }
 
 export default function DashboardStats({ payments = [] }: DashboardStatsProps) {
-    console.log('Payments reçus:', payments);
+    console.log('Payments reçus dans DashboardStats:', payments);
 
     const stats = useMemo(() => {
-        // Calcul des revenus totaux (tous les paiements payés)
-        const totalRevenue = payments
-            .filter(p => p.status === PaymentStatus.PAID)
-            .reduce((sum, p) => sum + p.amount, 0);
+        // Vérification des paiements payés
+        const paidPayments = payments.filter(p => p.status === PaymentStatus.PAID);
+        console.log('Paiements payés:', paidPayments);
 
-        console.log('Total revenue:', totalRevenue);
+        // Calcul des revenus totaux (tous les paiements payés)
+        const totalRevenue = paidPayments
+            .reduce((sum, p) => {
+                const amount = p.paidAmount || p.amount;
+                console.log(`Ajout au revenu total: ${amount} (ID: ${p.id})`);
+                return sum + amount;
+            }, 0);
+
+        console.log('Total revenue calculé:', totalRevenue);
 
         // Calcul des paiements du mois en cours
         const now = new Date();
         const startOfMonth = new Date(now.getFullYear(), now.getMonth(), 1);
         const endOfMonth = new Date(now.getFullYear(), now.getMonth() + 1, 0);
 
-        console.log('Période:', { startOfMonth, endOfMonth });
+        console.log('Période de calcul:', {
+            startOfMonth: startOfMonth.toISOString(),
+            endOfMonth: endOfMonth.toISOString(),
+            now: now.toISOString()
+        });
 
         const currentMonthPayments = payments.filter(payment => {
             const dueDate = new Date(payment.dueDate);
-            return dueDate >= startOfMonth && dueDate <= endOfMonth;
+            const isInCurrentMonth = dueDate >= startOfMonth && dueDate <= endOfMonth;
+            console.log(`Paiement ${payment.id}: date ${dueDate.toISOString()} - Dans le mois: ${isInCurrentMonth}`);
+            return isInCurrentMonth;
         });
 
-        console.log('Paiements du mois:', currentMonthPayments);
+        console.log('Paiements du mois trouvés:', currentMonthPayments);
 
         // Calcul du taux de paiement pour le mois en cours
-        const currentMonthTotal = currentMonthPayments.reduce((sum, p) => sum + p.amount, 0);
+        const currentMonthTotal = currentMonthPayments.reduce((sum, p) => {
+            console.log(`Ajout au total du mois: ${p.amount} (ID: ${p.id})`);
+            return sum + p.amount;
+        }, 0);
+
         const currentMonthPaid = currentMonthPayments
             .filter(p => p.status === PaymentStatus.PAID)
-            .reduce((sum, p) => sum + p.amount, 0);
+            .reduce((sum, p) => {
+                const amount = p.paidAmount || p.amount;
+                console.log(`Ajout au payé du mois: ${amount} (ID: ${p.id})`);
+                return sum + amount;
+            }, 0);
 
-        console.log('Montants du mois:', { total: currentMonthTotal, paid: currentMonthPaid });
+        console.log('Montants du mois calculés:', {
+            total: currentMonthTotal,
+            paid: currentMonthPaid
+        });
 
         const paymentRate = currentMonthTotal > 0 ? (currentMonthPaid / currentMonthTotal * 100) : 0;
+        console.log('Taux de paiement calculé:', paymentRate);
 
         // Calcul des paiements en retard
+        const today = new Date();
         const latePayments = payments
-            .filter(p => p.status === PaymentStatus.LATE)
-            .reduce((sum, p) => sum + p.amount, 0);
+            .filter(p => {
+                const dueDate = new Date(p.dueDate);
+                const isLate = p.status === PaymentStatus.LATE && dueDate < today;
+                console.log(`Vérification retard ${p.id}: date ${dueDate.toISOString()} - En retard: ${isLate}`);
+                return isLate;
+            })
+            .reduce((sum, p) => {
+                console.log(`Ajout aux impayés: ${p.amount} (ID: ${p.id})`);
+                return sum + p.amount;
+            }, 0);
 
         // Calcul des paiements en attente
         const pendingPayments = payments
-            .filter(p => p.status === PaymentStatus.PENDING)
-            .reduce((sum, p) => sum + p.amount, 0);
+            .filter(p => {
+                const dueDate = new Date(p.dueDate);
+                const isPending = p.status === PaymentStatus.PENDING && dueDate >= today;
+                console.log(`Vérification en attente ${p.id}: date ${dueDate.toISOString()} - En attente: ${isPending}`);
+                return isPending;
+            })
+            .reduce((sum, p) => {
+                console.log(`Ajout aux en attente: ${p.amount} (ID: ${p.id})`);
+                return sum + p.amount;
+            }, 0);
 
-        console.log('Autres montants:', { late: latePayments, pending: pendingPayments });
+        console.log('Montants finaux calculés:', {
+            totalRevenue,
+            paymentRate,
+            latePayments,
+            pendingPayments
+        });
 
         return [
             {

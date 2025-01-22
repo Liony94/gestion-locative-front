@@ -20,17 +20,24 @@ export default function OwnerDashboard() {
         const fetchPayments = async () => {
             try {
                 const response = await api.get('/payments/schedules');
-                const schedules = response;
+                const schedules = response.data;
                 const allPayments: Payment[] = [];
 
                 if (Array.isArray(schedules)) {
                     schedules.forEach((schedule: any) => {
                         if (schedule.payments) {
-                            allPayments.push(...schedule.payments);
+                            allPayments.push(...schedule.payments.map((payment: Payment) => ({
+                                ...payment,
+                                paymentSchedule: {
+                                    ...schedule,
+                                    payments: [] // Éviter la récursion infinie
+                                }
+                            })));
                         }
                     });
                 }
 
+                console.log('Paiements chargés dans le dashboard:', allPayments.length);
                 setPayments(allPayments);
             } catch (error) {
                 console.error('Erreur lors du chargement des paiements:', error);

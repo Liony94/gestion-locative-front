@@ -64,6 +64,11 @@ export interface PropertyFormData {
     rentExcludingCharges: number;
     charges?: number;
     paymentFrequency?: string;
+    rentalStartDate?: string;
+    rentalEndDate?: string;
+    leaseType?: string;
+    leaseTerms?: string;
+    specialConditions?: string;
 
     // Description physique
     surface: number;

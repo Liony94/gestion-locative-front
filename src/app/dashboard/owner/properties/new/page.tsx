@@ -3,17 +3,12 @@
 import { useRouter } from 'next/navigation';
 import { PropertyForm } from './components/PropertyForm';
 import { usePropertyForm } from './hooks/usePropertyForm';
-import CreatePaymentScheduleModal from '../../accounting/components/CreatePaymentScheduleModal';
 import { useState, useEffect } from 'react';
 import { Property } from '@/types/property';
-import { User } from '@/types/user';
 import React from 'react';
-import { PropertyFormData } from './types';
 
 export default function NewPropertyPage() {
     const router = useRouter();
-    const [showPaymentScheduleModal, setShowPaymentScheduleModal] = useState(false);
-    const [createdProperty, setCreatedProperty] = useState<Property | null>(null);
     const {
         formData,
         loading,
@@ -31,17 +26,11 @@ export default function NewPropertyPage() {
 
     useEffect(() => {
         if (success && createdPropertyData) {
-            setCreatedProperty(createdPropertyData);
             setTimeout(() => {
-                setShowPaymentScheduleModal(true);
+                router.push('/dashboard/owner/properties');
             }, 1500);
         }
-    }, [success, createdPropertyData]);
-
-    const handleClosePaymentScheduleModal = () => {
-        setShowPaymentScheduleModal(false);
-        router.push('/dashboard/owner/accounting');
-    };
+    }, [success, createdPropertyData, router]);
 
     const handleFormSubmit = (e: React.FormEvent) => {
         e.preventDefault();
@@ -50,13 +39,6 @@ export default function NewPropertyPage() {
 
     return (
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-            {showPaymentScheduleModal && createdProperty && (
-                <CreatePaymentScheduleModal
-                    onClose={handleClosePaymentScheduleModal}
-                    properties={[createdProperty]}
-                    tenants={[]}
-                />
-            )}
             <div className="bg-white dark:bg-gray-800 rounded-lg shadow-lg">
                 <div className="p-6">
                     <div className="mb-8">
@@ -103,8 +85,7 @@ export default function NewPropertyPage() {
                             <button
                                 type="submit"
                                 disabled={loading}
-                                className={`px-4 py-2 text-sm font-medium text-white bg-blue-600 border border-transparent rounded-md shadow-sm hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500 ${loading ? 'opacity-50 cursor-not-allowed' : ''
-                                    }`}
+                                className={`px-4 py-2 text-sm font-medium text-white bg-blue-600 border border-transparent rounded-md shadow-sm hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500 ${loading ? 'opacity-50 cursor-not-allowed' : ''}`}
                             >
                                 {loading ? 'Création en cours...' : 'Créer le bien'}
                             </button>

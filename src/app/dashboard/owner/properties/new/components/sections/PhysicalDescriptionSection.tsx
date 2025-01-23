@@ -32,16 +32,16 @@ export const PhysicalDescriptionSection = ({ formData, onChange }: PhysicalDescr
 
                 <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
                     <div className="relative">
-                        <label htmlFor="propertyType" className={labelClasses}>
+                        <label htmlFor="type" className={labelClasses}>
                             Type de bien
                         </label>
                         <div className={iconWrapperClasses}>
                             <HiOutlineHome size={20} />
                         </div>
                         <select
-                            id="propertyType"
-                            name="propertyType"
-                            value={formData.propertyType || ''}
+                            id="type"
+                            name="type"
+                            value={formData.type}
                             onChange={onChange}
                             className={selectClasses}
                         >
@@ -75,16 +75,16 @@ export const PhysicalDescriptionSection = ({ formData, onChange }: PhysicalDescr
                     </div>
 
                     <div className="relative">
-                        <label htmlFor="legalStatus" className={labelClasses}>
+                        <label htmlFor="buildingLegalStatus" className={labelClasses}>
                             Statut juridique
                         </label>
                         <div className={iconWrapperClasses}>
                             <TbBuildingEstate size={20} />
                         </div>
                         <select
-                            id="legalStatus"
-                            name="legalStatus"
-                            value={formData.legalStatus || ''}
+                            id="buildingLegalStatus"
+                            name="buildingLegalStatus"
+                            value={formData.buildingLegalStatus || ''}
                             onChange={onChange}
                             className={selectClasses}
                         >
@@ -95,7 +95,7 @@ export const PhysicalDescriptionSection = ({ formData, onChange }: PhysicalDescr
                     </div>
 
                     <div className="relative">
-                        <label htmlFor="livingSpace" className={labelClasses}>
+                        <label htmlFor="surface" className={labelClasses}>
                             Surface habitable (m²)
                         </label>
                         <div className={iconWrapperClasses}>
@@ -103,9 +103,9 @@ export const PhysicalDescriptionSection = ({ formData, onChange }: PhysicalDescr
                         </div>
                         <input
                             type="number"
-                            id="livingSpace"
-                            name="livingSpace"
-                            value={formData.livingSpace || ''}
+                            id="surface"
+                            name="surface"
+                            value={formData.surface || ''}
                             onChange={onChange}
                             className={inputClasses}
                             placeholder="80"
@@ -115,7 +115,7 @@ export const PhysicalDescriptionSection = ({ formData, onChange }: PhysicalDescr
                     </div>
 
                     <div className="relative">
-                        <label htmlFor="totalRooms" className={labelClasses}>
+                        <label htmlFor="numberOfRooms" className={labelClasses}>
                             Nombre de pièces
                         </label>
                         <div className={iconWrapperClasses}>
@@ -123,9 +123,9 @@ export const PhysicalDescriptionSection = ({ formData, onChange }: PhysicalDescr
                         </div>
                         <input
                             type="number"
-                            id="totalRooms"
-                            name="totalRooms"
-                            value={formData.totalRooms || ''}
+                            id="numberOfRooms"
+                            name="numberOfRooms"
+                            value={formData.numberOfRooms || ''}
                             onChange={onChange}
                             className={inputClasses}
                             placeholder="4"
@@ -134,7 +134,7 @@ export const PhysicalDescriptionSection = ({ formData, onChange }: PhysicalDescr
                     </div>
 
                     <div className="relative">
-                        <label htmlFor="bedrooms" className={labelClasses}>
+                        <label htmlFor="numberOfBedrooms" className={labelClasses}>
                             Chambres
                         </label>
                         <div className={iconWrapperClasses}>
@@ -142,9 +142,9 @@ export const PhysicalDescriptionSection = ({ formData, onChange }: PhysicalDescr
                         </div>
                         <input
                             type="number"
-                            id="bedrooms"
-                            name="bedrooms"
-                            value={formData.bedrooms || ''}
+                            id="numberOfBedrooms"
+                            name="numberOfBedrooms"
+                            value={formData.numberOfBedrooms || ''}
                             onChange={onChange}
                             className={inputClasses}
                             placeholder="2"
@@ -153,7 +153,7 @@ export const PhysicalDescriptionSection = ({ formData, onChange }: PhysicalDescr
                     </div>
 
                     <div className="relative">
-                        <label htmlFor="bathrooms" className={labelClasses}>
+                        <label htmlFor="numberOfBathrooms" className={labelClasses}>
                             Salles de bain
                         </label>
                         <div className={iconWrapperClasses}>
@@ -161,9 +161,9 @@ export const PhysicalDescriptionSection = ({ formData, onChange }: PhysicalDescr
                         </div>
                         <input
                             type="number"
-                            id="bathrooms"
-                            name="bathrooms"
-                            value={formData.bathrooms || ''}
+                            id="numberOfBathrooms"
+                            name="numberOfBathrooms"
+                            value={formData.numberOfBathrooms || ''}
                             onChange={onChange}
                             className={inputClasses}
                             placeholder="1"
@@ -172,22 +172,19 @@ export const PhysicalDescriptionSection = ({ formData, onChange }: PhysicalDescr
                     </div>
 
                     <div className="relative">
-                        <label htmlFor="constructionYear" className={labelClasses}>
+                        <label htmlFor="constructionDate" className={labelClasses}>
                             Année de construction
                         </label>
                         <div className={iconWrapperClasses}>
                             <BsCalendarDate size={20} />
                         </div>
                         <input
-                            type="number"
-                            id="constructionYear"
-                            name="constructionYear"
-                            value={formData.constructionYear || ''}
+                            type="date"
+                            id="constructionDate"
+                            name="constructionDate"
+                            value={formData.constructionDate ? new Date(formData.constructionDate).toISOString().split('T')[0] : ''}
                             onChange={onChange}
                             className={inputClasses}
-                            placeholder="2000"
-                            min="1800"
-                            max={new Date().getFullYear()}
                         />
                     </div>
                 </div>
@@ -215,22 +212,7 @@ export const PhysicalDescriptionSection = ({ formData, onChange }: PhysicalDescr
                             onChange={onChange}
                             rows={4}
                             className={textareaClasses}
-                            placeholder="Décrivez les caractéristiques principales du bien..."
-                        />
-                    </div>
-
-                    <div>
-                        <label htmlFor="additionalDetails" className={labelClasses}>
-                            Détails supplémentaires
-                        </label>
-                        <textarea
-                            id="additionalDetails"
-                            name="additionalDetails"
-                            value={formData.additionalDetails || ''}
-                            onChange={onChange}
-                            rows={4}
-                            className={textareaClasses}
-                            placeholder="Ajoutez des détails supplémentaires sur le bien..."
+                            placeholder="Description détaillée du bien..."
                         />
                     </div>
                 </div>

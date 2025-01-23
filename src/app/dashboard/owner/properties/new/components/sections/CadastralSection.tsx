@@ -9,9 +9,9 @@ interface CadastralSectionProps {
 }
 
 export const CadastralSection = ({ formData, onChange }: CadastralSectionProps) => {
-    const inputClasses = "mt-1 block w-full rounded-lg border-gray-300 dark:border-gray-600 dark:bg-gray-800 shadow-sm focus:border-blue-500 focus:ring-blue-500 transition-all duration-200 pl-10";
-    const labelClasses = "block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1";
-    const iconClasses = "absolute left-3 top-[38px] text-gray-400 dark:text-gray-500";
+    const inputClasses = "block w-full pl-10 pr-3 py-2.5 text-sm rounded-lg border-gray-300 dark:border-gray-600 dark:bg-gray-700 focus:ring-blue-500 focus:border-blue-500 hover:border-blue-400 dark:hover:border-blue-400 transition-all duration-200";
+    const labelClasses = "block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1.5";
+    const iconWrapperClasses = "absolute left-3 top-[2.1rem] text-gray-400 dark:text-gray-500 pointer-events-none transition-colors duration-200 group-hover:text-blue-500";
 
     return (
         <div className="space-y-6">
@@ -26,11 +26,13 @@ export const CadastralSection = ({ formData, onChange }: CadastralSectionProps) 
                 </div>
 
                 <div className="grid grid-cols-1 gap-6 md:grid-cols-2">
-                    <div className="relative">
+                    <div className="relative group">
                         <label htmlFor="lotNumber" className={labelClasses}>
                             Numéro de lot
                         </label>
-                        <BsCardChecklist className={iconClasses} size={20} />
+                        <div className={iconWrapperClasses}>
+                            <BsCardChecklist size={20} />
+                        </div>
                         <input
                             type="text"
                             id="lotNumber"
@@ -42,11 +44,13 @@ export const CadastralSection = ({ formData, onChange }: CadastralSectionProps) 
                         />
                     </div>
 
-                    <div className="relative">
+                    <div className="relative group">
                         <label htmlFor="coownershipUnits" className={labelClasses}>
                             Tantièmes de copropriété
                         </label>
-                        <BsBuilding className={iconClasses} size={20} />
+                        <div className={iconWrapperClasses}>
+                            <BsBuilding size={20} />
+                        </div>
                         <input
                             type="text"
                             id="coownershipUnits"
@@ -58,11 +62,13 @@ export const CadastralSection = ({ formData, onChange }: CadastralSectionProps) 
                         />
                     </div>
 
-                    <div className="relative md:col-span-2">
+                    <div className="relative group md:col-span-2">
                         <label htmlFor="cadastralReference" className={labelClasses}>
                             Référence cadastrale
                         </label>
-                        <HiOutlineDocumentText className={iconClasses} size={20} />
+                        <div className={iconWrapperClasses}>
+                            <HiOutlineDocumentText size={20} />
+                        </div>
                         <input
                             type="text"
                             id="cadastralReference"

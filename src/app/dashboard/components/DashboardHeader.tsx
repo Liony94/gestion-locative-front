@@ -1,39 +1,22 @@
 'use client';
 import { useState, useEffect } from 'react';
 import Link from 'next/link';
-import { useRouter, usePathname } from 'next/navigation';
+import { useRouter } from 'next/navigation';
 import { useAuth } from '@/hooks/useAuth';
 import { UserRole } from '@/app/auth/register/page';
 import { useTheme } from 'next-themes';
 import { Moon, Sun } from 'lucide-react';
 
-const ownerNavigation = [
-    { name: 'Tableau de bord', href: '/dashboard' },
-    { name: 'Propriétés', href: '/dashboard/owner/properties' },
-    { name: 'Locataires', href: '/dashboard/owner/tenants' },
-    { name: 'Documents', href: '/dashboard/owner/documents' },
-    { name: 'Comptabilité', href: '/dashboard/owner/accounting' },
-];
-
-const tenantNavigation = [
-    { name: 'Tableau de bord', href: '/dashboard/tenant' },
-    { name: 'Documents', href: '/dashboard/tenant/documents' },
-    { name: 'Paiements', href: '/dashboard/tenant/payments' },
-];
-
 export default function DashboardHeader() {
     const [isProfileOpen, setIsProfileOpen] = useState(false);
     const [mounted, setMounted] = useState(false);
     const router = useRouter();
-    const pathname = usePathname();
     const { isAuthenticated, role, isLoading, user, logout } = useAuth();
     const { theme, setTheme } = useTheme();
 
     useEffect(() => {
         setMounted(true);
     }, []);
-
-    const navigation = role === UserRole.OWNER ? ownerNavigation : tenantNavigation;
 
     const handleLogout = () => {
         logout();
@@ -76,44 +59,20 @@ export default function DashboardHeader() {
     }
 
     return (
-        <header className="bg-white dark:bg-gray-800 shadow-sm">
+        <header className="fixed top-0 left-0 right-0 bg-white dark:bg-gray-800 shadow-sm z-50">
             <div className="container mx-auto px-4">
                 <div className="flex justify-between h-16">
-                    {/* Logo et Navigation */}
+                    {/* Logo */}
                     <div className="flex">
                         <div className="flex-shrink-0 flex items-center">
-                            <span className="text-2xl font-bold text-blue-600 dark:text-blue-400">
+                            <Link href="/dashboard" className="text-2xl font-bold text-blue-600 dark:text-blue-400">
                                 ImmoGest 🏠
-                            </span>
+                            </Link>
                         </div>
-                        <nav className="hidden md:ml-8 md:flex md:space-x-8">
-                            {navigation.map((item) => (
-                                <Link
-                                    key={item.name}
-                                    href={item.href}
-                                    className={`inline-flex items-center px-1 pt-1 text-sm font-medium border-b-2 ${pathname === item.href
-                                        ? 'border-blue-500 text-gray-900 dark:text-white'
-                                        : 'border-transparent text-gray-500 dark:text-gray-400 hover:border-gray-300 hover:text-gray-700 dark:hover:text-gray-300'
-                                        }`}
-                                >
-                                    {item.name}
-                                </Link>
-                            ))}
-                        </nav>
                     </div>
 
                     {/* Actions et Profil */}
                     <div className="flex items-center space-x-4">
-                        {/* Bouton Nouveau - uniquement pour les propriétaires */}
-                        {role === UserRole.OWNER && (
-                            <Link
-                                href="/dashboard/owner/properties/new"
-                                className="inline-flex items-center px-4 py-2 border border-transparent text-sm font-medium rounded-lg shadow-sm text-white bg-blue-600 hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500 dark:bg-blue-500 dark:hover:bg-blue-600"
-                            >
-                                + Nouveau bien
-                            </Link>
-                        )}
-
                         {/* Theme Switcher */}
                         <button
                             onClick={() => setTheme(theme === 'dark' ? 'light' : 'dark')}

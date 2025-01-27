@@ -4,6 +4,7 @@ import { ReactNode } from 'react';
 import { usePathname } from 'next/navigation';
 import { Geist, Geist_Mono } from "next/font/google";
 import DashboardHeader from './dashboard/components/DashboardHeader';
+import Sidebar from './dashboard/components/Sidebar';
 import "./globals.css";
 import { ThemeProvider } from '@/providers/ThemeProvider';
 import { Toaster } from 'sonner';
@@ -36,10 +37,22 @@ export default function RootLayout({ children }: RootLayoutProps) {
           disableTransitionOnChange
         >
           <div className="min-h-screen bg-gray-50 dark:bg-gray-900">
-            {isDashboard && <DashboardHeader />}
-            <main className={isDashboard ? 'pt-4' : ''}>
-              {children}
-            </main>
+            {isDashboard && (
+              <>
+                <DashboardHeader />
+                <Sidebar />
+                <main className="pl-64 pt-16">
+                  <div className="p-6">
+                    {children}
+                  </div>
+                </main>
+              </>
+            )}
+            {!isDashboard && (
+              <main>
+                {children}
+              </main>
+            )}
           </div>
           <Toaster
             position="top-right"

@@ -1,5 +1,6 @@
 import { useState, useEffect } from 'react';
 import Link from 'next/link';
+import { useRouter } from 'next/navigation';
 import { Property } from '@/types/property';
 import { api } from '@/services/api';
 import { HiOutlineHome, HiOutlineLocationMarker, HiOutlineCurrencyEuro, HiOutlineScale, HiOutlineKey } from 'react-icons/hi';
@@ -25,6 +26,7 @@ interface PropertyRentals {
 }
 
 export default function PropertyList({ properties }: PropertyListProps) {
+    const router = useRouter();
     const [activeRentals, setActiveRentals] = useState<PropertyRentals>({});
     const [loading, setLoading] = useState<boolean>(true);
     const [selectedProperty, setSelectedProperty] = useState<Property | null>(null);
@@ -63,6 +65,10 @@ export default function PropertyList({ properties }: PropertyListProps) {
         setSelectedProperty(null);
     };
 
+    const handleRowClick = (slug: string) => {
+        router.push(`/dashboard/owner/properties/${slug}`);
+    };
+
     return (
         <>
             <div className="overflow-hidden bg-white dark:bg-gray-800 shadow-sm sm:rounded-lg">
@@ -95,14 +101,18 @@ export default function PropertyList({ properties }: PropertyListProps) {
                             const activeLeaseCount = activeRentals[property.id] || 0;
 
                             return (
-                                <tr key={property.id} className="hover:bg-gray-50 dark:hover:bg-gray-700/50 transition-colors duration-200">
+                                <tr
+                                    key={property.id}
+                                    className="group hover:bg-gray-50 dark:hover:bg-gray-700/50 transition-colors duration-200 cursor-pointer"
+                                    onClick={() => handleRowClick(slug)}
+                                >
                                     <td className="px-6 py-4 whitespace-nowrap">
                                         <div className="flex items-center">
                                             <div className="flex-shrink-0 h-10 w-10 bg-gray-100 dark:bg-gray-700 rounded-lg flex items-center justify-center">
                                                 <HiOutlineHome className="h-6 w-6 text-gray-500 dark:text-gray-400" />
                                             </div>
                                             <div className="ml-4">
-                                                <div className="text-sm font-medium text-gray-900 dark:text-white">
+                                                <div className="text-sm font-medium text-gray-900 dark:text-white group-hover:text-blue-600 dark:group-hover:text-blue-400">
                                                     {property.identifier}
                                                 </div>
                                                 <div className="text-sm text-gray-500 dark:text-gray-400">
@@ -134,7 +144,7 @@ export default function PropertyList({ properties }: PropertyListProps) {
                                             </span>
                                         </div>
                                     </td>
-                                    <td className="px-6 py-4">
+                                    <td className="px-6 py-4" onClick={(e) => e.stopPropagation()}>
                                         <div className="flex items-center text-sm text-gray-600 dark:text-gray-300">
                                             <HiOutlineKey className="h-5 w-5 mr-2 text-gray-400" />
                                             {loading ? (
@@ -156,15 +166,14 @@ export default function PropertyList({ properties }: PropertyListProps) {
                                             )}
                                         </div>
                                     </td>
-                                    <td className="px-6 py-4 whitespace-nowrap text-right text-sm font-medium">
+                                    <td className="px-6 py-4 whitespace-nowrap text-right text-sm font-medium" onClick={(e) => e.stopPropagation()}>
                                         <div className="flex justify-end space-x-3">
-                                            <Link
-                                                href={`/dashboard/owner/properties/${slug}`}
+                                            <button
                                                 className="text-blue-600 dark:text-blue-400 hover:text-blue-800 dark:hover:text-blue-300"
+                                                onClick={(e) => {
+                                                    // TODO: Ajouter la logique de modification
+                                                }}
                                             >
-                                                Détails
-                                            </Link>
-                                            <button className="text-blue-600 dark:text-blue-400 hover:text-blue-800 dark:hover:text-blue-300">
                                                 Modifier
                                             </button>
                                         </div>

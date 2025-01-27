@@ -4,40 +4,7 @@ import { useState, useEffect } from 'react';
 import { useParams } from 'next/navigation';
 import Link from 'next/link';
 import TenantDetailsModal from '../components/TenantDetailsModal';
-
-interface Tenant {
-    id: number;
-    firstName: string;
-    lastName: string;
-    email: string;
-    phone: string;
-    address: string;
-    role: 'OWNER' | 'TENANT' | 'ADMIN';
-}
-
-interface Property {
-    id: number;
-    title: string;
-    description: string;
-    price: number;
-    address: string;
-    city: string;
-    zipCode: string;
-    type: string;
-    surface: number;
-    images: string[];
-    tenants: Tenant[];
-    owner: {
-        id: number;
-        email: string;
-        firstName: string;
-        lastName: string;
-        phone: string;
-        address: string;
-        companyName?: string;
-        siret?: string;
-    };
-}
+import { Property, Tenant } from '@/types/property';
 
 export default function PropertyDetailsPage() {
     const params = useParams();
@@ -164,7 +131,7 @@ export default function PropertyDetailsPage() {
                     Retour aux propriétés
                 </Link>
                 <h1 className="text-2xl font-bold text-gray-900 dark:text-white">
-                    {property.title}
+                    {property.identifier}
                 </h1>
             </div>
 
@@ -172,7 +139,7 @@ export default function PropertyDetailsPage() {
             <div className="relative h-96 w-full rounded-lg overflow-hidden mb-8">
                 <img
                     src={getMainImage()}
-                    alt={property.title}
+                    alt={property.identifier}
                     className="w-full h-full object-cover"
                     onError={handleImageError}
                 />
@@ -187,6 +154,12 @@ export default function PropertyDetailsPage() {
                     <div className="space-y-3">
                         <div className="flex items-center text-sm">
                             <svg className="h-5 w-5 mr-2 text-gray-500 dark:text-gray-400" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M10 20l4-16m4 4l4 4-4 4M6 16l-4-4 4-4" />
+                            </svg>
+                            <span className="text-gray-600 dark:text-gray-300">{property.identifier}</span>
+                        </div>
+                        <div className="flex items-center text-sm">
+                            <svg className="h-5 w-5 mr-2 text-gray-500 dark:text-gray-400" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                                 <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 21V5a2 2 0 00-2-2H7a2 2 0 00-2 2v16m14 0h2m-2 0h-5m-9 0H3m2 0h5M9 7h1m-1 4h1m4-4h1m-1 4h1m-5 10v-5a1 1 0 011-1h2a1 1 0 011 1v5m-4 0h4" />
                             </svg>
                             <span className="text-gray-600 dark:text-gray-300">{property.surface} m²</span>
@@ -195,14 +168,27 @@ export default function PropertyDetailsPage() {
                             <svg className="h-5 w-5 mr-2 text-gray-500 dark:text-gray-400" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                                 <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 8c-1.657 0-3 .895-3 2s1.343 2 3 2 3 .895 3 2-1.343 2-3 2m0-8c1.11 0 2.08.402 2.599 1M12 8V7m0 1v8m0 0v1m0-1c-1.11 0-2.08-.402-2.599-1M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
                             </svg>
-                            <span className="text-gray-600 dark:text-gray-300">{property.price} €/mois</span>
+                            <span className="text-gray-600 dark:text-gray-300">{property.rentExcludingCharges} €/mois</span>
                         </div>
+                        {property.charges && (
+                            <div className="flex items-center text-sm">
+                                <svg className="h-5 w-5 mr-2 text-gray-500 dark:text-gray-400" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M17 9V7a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2m2 4h10a2 2 0 002-2v-6a2 2 0 00-2-2H9a2 2 0 00-2 2v6a2 2 0 002 2zm7-5a2 2 0 11-4 0 2 2 0 014 0z" />
+                                </svg>
+                                <span className="text-gray-600 dark:text-gray-300">Charges : {property.charges} €/mois</span>
+                            </div>
+                        )}
                         <div className="flex items-center text-sm">
                             <svg className="h-5 w-5 mr-2 text-gray-500 dark:text-gray-400" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                                 <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M3 12l2-2m0 0l7-7 7 7M5 10v10a1 1 0 001 1h3m10-11l2 2m-2-2v10a1 1 0 01-1 1h-3m-6 0a1 1 0 001-1v-4a1 1 0 011-1h2a1 1 0 011 1v4a1 1 0 001 1m-6 0h6" />
                             </svg>
                             <span className="text-gray-600 dark:text-gray-300">
-                                {property.address}, {property.zipCode} {property.city}
+                                {property.address}
+                                {property.address2 && `, ${property.address2}`}
+                                <br />
+                                {property.zipCode} {property.city}
+                                <br />
+                                {property.country}
                             </span>
                         </div>
                         <div className="flex items-center text-sm">
@@ -210,6 +196,62 @@ export default function PropertyDetailsPage() {
                                 <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M7 7h.01M7 3h5c.512 0 1.024.195 1.414.586l7 7a2 2 0 010 2.828l-7 7a2 2 0 01-2.828 0l-7-7A1.994 1.994 0 013 12V7a4 4 0 014-4z" />
                             </svg>
                             <span className="text-gray-600 dark:text-gray-300">{property.type}</span>
+                        </div>
+                    </div>
+                </div>
+
+                <div className="bg-white dark:bg-gray-800 rounded-lg p-6 shadow-sm">
+                    <h2 className="text-lg font-semibold text-gray-900 dark:text-white mb-4">
+                        Caractéristiques
+                    </h2>
+                    <div className="space-y-3">
+                        {property.numberOfRooms && (
+                            <div className="flex items-center text-sm">
+                                <svg className="h-5 w-5 mr-2 text-gray-500 dark:text-gray-400" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 5a1 1 0 011-1h14a1 1 0 011 1v2a1 1 0 01-1 1H5a1 1 0 01-1-1V5zM4 13a1 1 0 011-1h6a1 1 0 011 1v6a1 1 0 01-1 1H5a1 1 0 01-1-1v-6zM16 13a1 1 0 011-1h2a1 1 0 011 1v6a1 1 0 01-1 1h-2a1 1 0 01-1-1v-6z" />
+                                </svg>
+                                <span className="text-gray-600 dark:text-gray-300">{property.numberOfRooms} pièces</span>
+                            </div>
+                        )}
+                        {property.numberOfBedrooms && (
+                            <div className="flex items-center text-sm">
+                                <svg className="h-5 w-5 mr-2 text-gray-500 dark:text-gray-400" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M3 12l2-2m0 0l7-7 7 7M5 10v10a1 1 0 001 1h3m10-11l2 2m-2-2v10a1 1 0 01-1 1h-3m-6 0a1 1 0 001-1v-4a1 1 0 011-1h2a1 1 0 011 1v4a1 1 0 001 1m-6 0h6" />
+                                </svg>
+                                <span className="text-gray-600 dark:text-gray-300">{property.numberOfBedrooms} chambres</span>
+                            </div>
+                        )}
+                        {property.numberOfBathrooms && (
+                            <div className="flex items-center text-sm">
+                                <svg className="h-5 w-5 mr-2 text-gray-500 dark:text-gray-400" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M3 12l2-2m0 0l7-7 7 7M5 10v10a1 1 0 001 1h3m10-11l2 2m-2-2v10a1 1 0 01-1 1h-3m-6 0a1 1 0 001-1v-4a1 1 0 011-1h2a1 1 0 011 1v4a1 1 0 001 1m-6 0h6" />
+                                </svg>
+                                <span className="text-gray-600 dark:text-gray-300">{property.numberOfBathrooms} salles de bain</span>
+                            </div>
+                        )}
+                        <div className="flex items-center text-sm">
+                            <svg className="h-5 w-5 mr-2 text-gray-500 dark:text-gray-400" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z" />
+                            </svg>
+                            <span className="text-gray-600 dark:text-gray-300">
+                                {property.isFurnished ? 'Meublé' : 'Non meublé'}
+                            </span>
+                        </div>
+                        <div className="flex items-center text-sm">
+                            <svg className="h-5 w-5 mr-2 text-gray-500 dark:text-gray-400" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z" />
+                            </svg>
+                            <span className="text-gray-600 dark:text-gray-300">
+                                {property.smokersAllowed ? 'Fumeurs autorisés' : 'Non-fumeur'}
+                            </span>
+                        </div>
+                        <div className="flex items-center text-sm">
+                            <svg className="h-5 w-5 mr-2 text-gray-500 dark:text-gray-400" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z" />
+                            </svg>
+                            <span className="text-gray-600 dark:text-gray-300">
+                                {property.petsAllowed ? 'Animaux autorisés' : 'Animaux non autorisés'}
+                            </span>
                         </div>
                     </div>
                 </div>
@@ -252,9 +294,9 @@ export default function PropertyDetailsPage() {
 
                 <div className="bg-white dark:bg-gray-800 rounded-lg p-6 shadow-sm">
                     <h2 className="text-lg font-semibold text-gray-900 dark:text-white mb-4">
-                        Locataires ({property.tenants.length})
+                        Locataires ({property.tenants?.length || 0})
                     </h2>
-                    {property.tenants.length === 0 ? (
+                    {(!property.tenants || property.tenants.length === 0) ? (
                         <p className="text-sm text-gray-500 dark:text-gray-400">
                             Aucun locataire associé à ce bien
                         </p>

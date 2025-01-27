@@ -3,25 +3,17 @@
 import { useState, useEffect } from 'react';
 import Link from 'next/link';
 import PropertyCard from './components/PropertyCard';
+import PropertyList from './components/PropertyList';
+import { HiViewGrid, HiViewList } from 'react-icons/hi';
+import { Property } from '@/types/property';
 
-interface Property {
-    id: number;
-    identifier: string;
-    description: string;
-    price: number;
-    address: string;
-    city: string;
-    zipCode: string;
-    type: string;
-    surface: number;
-    image: string;
-    images: string[];
-}
+type ViewMode = 'grid' | 'list';
 
 export default function PropertiesPage() {
     const [properties, setProperties] = useState<Property[]>([]);
     const [loading, setLoading] = useState(true);
     const [error, setError] = useState<string | null>(null);
+    const [viewMode, setViewMode] = useState<ViewMode>('list');
 
     useEffect(() => {
         const fetchProperties = async () => {
@@ -82,12 +74,36 @@ export default function PropertiesPage() {
                         Gérez vos biens immobiliers
                     </p>
                 </div>
-                <Link
-                    href="/dashboard/owner/properties/new"
-                    className="inline-flex items-center px-4 py-2 border border-transparent text-sm font-medium rounded-md shadow-sm text-white bg-blue-600 hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500"
-                >
-                    + Ajouter un bien
-                </Link>
+                <div className="flex items-center space-x-4">
+                    <div className="flex items-center bg-white dark:bg-gray-800 rounded-lg shadow-sm p-1">
+                        <button
+                            onClick={() => setViewMode('grid')}
+                            className={`p-2 rounded-md transition-colors duration-200 ${viewMode === 'grid'
+                                ? 'bg-blue-100 text-blue-600 dark:bg-blue-900/50 dark:text-blue-400'
+                                : 'text-gray-500 dark:text-gray-400 hover:bg-gray-100 dark:hover:bg-gray-700'
+                                }`}
+                            title="Vue en grille"
+                        >
+                            <HiViewGrid className="h-5 w-5" />
+                        </button>
+                        <button
+                            onClick={() => setViewMode('list')}
+                            className={`p-2 rounded-md transition-colors duration-200 ${viewMode === 'list'
+                                ? 'bg-blue-100 text-blue-600 dark:bg-blue-900/50 dark:text-blue-400'
+                                : 'text-gray-500 dark:text-gray-400 hover:bg-gray-100 dark:hover:bg-gray-700'
+                                }`}
+                            title="Vue en liste"
+                        >
+                            <HiViewList className="h-5 w-5" />
+                        </button>
+                    </div>
+                    <Link
+                        href="/dashboard/owner/properties/new"
+                        className="inline-flex items-center px-4 py-2 border border-transparent text-sm font-medium rounded-md shadow-sm text-white bg-blue-600 hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500"
+                    >
+                        + Ajouter un bien
+                    </Link>
+                </div>
             </div>
 
             {properties.length === 0 ? (
@@ -121,12 +137,14 @@ export default function PropertiesPage() {
                         </Link>
                     </div>
                 </div>
-            ) : (
+            ) : viewMode === 'grid' ? (
                 <div className="grid grid-cols-1 gap-6 sm:grid-cols-2 lg:grid-cols-3">
                     {properties.map((property) => (
                         <PropertyCard key={property.id} property={property} />
                     ))}
                 </div>
+            ) : (
+                <PropertyList properties={properties} />
             )}
         </div>
     );

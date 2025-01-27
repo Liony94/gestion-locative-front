@@ -16,8 +16,8 @@ import {
     HiOutlineSortDescending
 } from 'react-icons/hi';
 
-const createSlug = (id: number, name: string) => {
-    const normalizedName = name
+const createSlug = (id: number, name: string | undefined) => {
+    const normalizedName = (name || '')
         .toLowerCase()
         .normalize('NFD')
         .replace(/[\u0300-\u036f]/g, '')
@@ -72,9 +72,9 @@ export default function RentalsPage() {
         if (searchQuery) {
             const query = searchQuery.toLowerCase();
             result = result.filter(rental =>
-                rental.name.toLowerCase().includes(query) ||
-                `${rental.tenant?.firstName} ${rental.tenant?.lastName}`.toLowerCase().includes(query) ||
-                rental.property?.identifier.toLowerCase().includes(query)
+                (rental.name || '').toLowerCase().includes(query) ||
+                `${rental.tenant?.firstName || ''} ${rental.tenant?.lastName || ''}`.toLowerCase().includes(query) ||
+                (rental.property?.identifier || '').toLowerCase().includes(query)
             );
         }
 
@@ -86,10 +86,10 @@ export default function RentalsPage() {
                     comparison = new Date(a.startDate).getTime() - new Date(b.startDate).getTime();
                     break;
                 case 'rent':
-                    comparison = a.rent - b.rent;
+                    comparison = (a.rent || 0) - (b.rent || 0);
                     break;
                 case 'name':
-                    comparison = a.name.localeCompare(b.name);
+                    comparison = (a.name || '').localeCompare(b.name || '');
                     break;
             }
             return sortOrder === 'asc' ? comparison : -comparison;

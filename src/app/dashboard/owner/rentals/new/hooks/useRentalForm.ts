@@ -1,34 +1,119 @@
-import { useState, useCallback, useEffect } from 'react';
-import { useRouter } from 'next/navigation';
-import { RentalFormData, DEFAULT_RENTAL_FORM_DATA, Rental } from '@/types/rental';
-import { Property } from '@/types/property';
-import { User } from '@/types/user';
+'use client';
+
+import { useState, useEffect } from 'react';
+import { useRouter, useSearchParams } from 'next/navigation';
 import { api } from '@/services/api';
+import { User } from '@/types/user';
+import { Property } from '@/types/property';
+import { RentalFormData, PaymentFrequency, PaymentType, ChargeType, RentalType, UsageType, Rental } from '@/types/rental';
+
+export const DEFAULT_RENTAL_FORM_DATA: RentalFormData = {
+    // Relations
+    propertyId: 0,
+    tenantId: 0,
+
+    // Informations générales
+    type: RentalType.EMPTY_HOUSING,
+    usage: UsageType.MAIN_RESIDENCE,
+    startDate: new Date().toISOString().split('T')[0],
+    endDate: '',
+    tacitRenewal: true,
+    name: '',
+    description: '',
+
+    // Paiement
+    paymentFrequency: PaymentFrequency.MONTHLY,
+    paymentType: PaymentType.IN_ADVANCE,
+    paymentDay: 1,
+    rent: 0,
+    rentVatRate: 0,
+    charges: 0,
+    chargeType: ChargeType.PROVISION,
+    chargesVatRate: 0,
+    deposit: 0,
+    housingBenefit: 0,
+    latePaymentFee: 0,
+
+    // Révision de loyer
+    rentRevisionEnabled: true,
+    rentRevisionIndex: 'IRL',
+    rentRevisionPeriod: 12,
+
+    // Encadrement des loyers
+    rentControlEnabled: false,
+    referenceRent: 0,
+    maxRent: 0,
+    rentSupplement: 0,
+    rentSupplementJustification: '',
+
+    // Travaux
+    ownerWorkAmount: 0,
+    ownerWorkDescription: '',
+    tenantWorkAmount: 0,
+    tenantWorkDescription: '',
+
+    // Informations complémentaires
+    specialConditions: '',
+    specialClauses: '',
+    comments: '',
+
+    // État des lieux
+    checkInDate: '',
+    checkInNotes: '',
+    checkOutDate: '',
+    checkOutNotes: '',
+
+    // Quittances
+    billingDay: 1,
+    separateBillingAddress: false,
+    billingAddress: '',
+    documentTitle: 'Quittance',
+    automaticNumbering: true,
+    includeNoticeSecondPage: false,
+    receiptText: '',
+    noticeText: '',
+
+    // Autres réglages
+    balanceReportType: 'manual',
+    notifyOwner: true,
+    notifyTenant: true,
+    notifyContractEnd: true,
+    isActive: true
+};
 
 export const useRentalForm = () => {
     const router = useRouter();
-    const [loading, setLoading] = useState(false);
-    const [error, setError] = useState<string | null>(null);
-    const [success, setSuccess] = useState(false);
+    const searchParams = useSearchParams();
     const [formData, setFormData] = useState<RentalFormData>(DEFAULT_RENTAL_FORM_DATA);
-    const [createdRentalData, setCreatedRentalData] = useState<Rental | null>(null);
     const [properties, setProperties] = useState<Property[]>([]);
     const [tenants, setTenants] = useState<User[]>([]);
+    const [loading, setLoading] = useState(false);
     const [loadingData, setLoadingData] = useState(true);
+    const [error, setError] = useState<string | null>(null);
+    const [success, setSuccess] = useState(false);
+    const [createdRentalData, setCreatedRentalData] = useState<Rental | null>(null);
 
-    // Charger les propriétés et les locataires
+    useEffect(() => {
+        const propertyId = searchParams.get('propertyId');
+        if (propertyId) {
+            setFormData(prev => ({ ...prev, propertyId: parseInt(propertyId, 10) }));
+        }
+    }, [searchParams]);
+
     useEffect(() => {
         const fetchData = async () => {
             try {
+                setLoadingData(true);
                 const [propertiesResponse, tenantsResponse] = await Promise.all([
                     api.get('/properties/owner'),
                     api.get('/user/tenants')
                 ]);
                 setProperties(propertiesResponse.data);
                 setTenants(tenantsResponse.data);
+                setError(null);
             } catch (err) {
                 console.error('Erreur lors du chargement des données:', err);
-                setError('Erreur lors du chargement des données');
+                setError('Impossible de charger les données nécessaires');
             } finally {
                 setLoadingData(false);
             }
@@ -37,139 +122,82 @@ export const useRentalForm = () => {
         fetchData();
     }, []);
 
-    const handleChange = useCallback((e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement | HTMLSelectElement>) => {
-        const { name, value, type } = e.target as HTMLInputElement;
-
-        setFormData(prev => ({
-            ...prev,
-            [name]: type === 'checkbox'
-                ? (e.target as HTMLInputElement).checked
-                : (name === 'propertyId' || name === 'tenantId')
-                    ? parseInt(value) || 0
-                    : value
-        }));
-
-        // Validation des dates
-        if (name === 'startDate' || name === 'endDate') {
-            const startDate = name === 'startDate' ? new Date(value) : new Date(formData.startDate);
-            const endDate = name === 'endDate' ? new Date(value) : formData.endDate ? new Date(formData.endDate) : null;
-
-            if (endDate && startDate > endDate) {
-                setError('La date de fin doit être postérieure à la date de début');
-            } else {
-                setError(null);
-            }
-        }
-    }, [formData.startDate]);
-
-    const handleArrayChange = (name: string, value: string[]) => {
-        setFormData(prev => ({
-            ...prev,
-            [name]: value
-        }));
+    const handleChange = (name: keyof RentalFormData, value: any) => {
+        setFormData(prev => ({ ...prev, [name]: value }));
     };
 
-    const validateForm = (): boolean => {
-        if (!formData.name.trim()) {
-            setError('Le nom de la location est requis');
-            return false;
-        }
-
-        if (!formData.startDate) {
-            setError('La date de début est requise');
-            return false;
-        }
-
-        if (formData.endDate && new Date(formData.startDate) > new Date(formData.endDate)) {
-            setError('La date de fin doit être postérieure à la date de début');
-            return false;
-        }
-
-        if (formData.rent <= 0) {
-            setError('Le loyer doit être supérieur à 0');
-            return false;
-        }
-
-        if (!formData.propertyId || formData.propertyId === 0) {
-            setError('Veuillez sélectionner une propriété');
-            return false;
-        }
-
-        if (!formData.tenantId || formData.tenantId === 0) {
-            setError('Veuillez sélectionner un locataire');
-            return false;
-        }
-
-        return true;
+    const handleArrayChange = (name: keyof RentalFormData, value: any[]) => {
+        setFormData(prev => ({ ...prev, [name]: value }));
     };
 
-    const handleSubmit = useCallback(async () => {
-        if (!validateForm()) {
+    const validateForm = () => {
+        if (!formData.propertyId) return 'Veuillez sélectionner un bien';
+        if (!formData.tenantId) return 'Veuillez sélectionner un locataire';
+        if (!formData.type) return 'Veuillez sélectionner un type de location';
+        if (!formData.usage) return 'Veuillez sélectionner un usage';
+        if (!formData.startDate) return 'Veuillez sélectionner une date de début';
+        if (!formData.rent) return 'Veuillez saisir un montant de loyer';
+        if (!formData.deposit) return 'Veuillez saisir un montant de dépôt de garantie';
+        return null;
+    };
+
+    const handleSubmit = async () => {
+        const validationError = validateForm();
+        if (validationError) {
+            setError(validationError);
             return;
         }
 
-        setLoading(true);
-        setError(null);
-        setSuccess(false);
-
         try {
-            // Fonction utilitaire pour convertir les nombres décimaux
-            const toDecimal = (value: any): string => {
-                if (value === null || value === undefined || value === '') {
-                    return '0.00';
-                }
-                const strValue = String(value).replace(',', '.');
-                const num = parseFloat(strValue);
-                return isNaN(num) ? '0.00' : num.toFixed(2);
-            };
+            setLoading(true);
+            setError(null);
 
-            // Préparer les données avec les bonnes conversions de types
+            // Conversion des dates au format attendu par le backend
             const rentalData = {
-                name: formData.name.trim(),
-                description: formData.description?.trim() || undefined,
+                ...formData,
+                propertyId: parseInt(formData.propertyId.toString(), 10),
+                tenantId: parseInt(formData.tenantId.toString(), 10),
+                name: formData.name || `Location ${new Date().toISOString().split('T')[0]}`,
                 startDate: new Date(formData.startDate).toISOString(),
-                endDate: formData.endDate ? new Date(formData.endDate).toISOString() : undefined,
-                rent: toDecimal(formData.rent),
-                charges: formData.charges ? toDecimal(formData.charges) : undefined,
-                deposit: formData.deposit ? toDecimal(formData.deposit) : undefined,
-                surface: formData.surface ? toDecimal(formData.surface) : undefined,
-                isFurnished: Boolean(formData.isFurnished),
-                furniture: Array.isArray(formData.furniture) ? formData.furniture.filter(item => item.trim()) : [],
-                propertyId: Number(formData.propertyId),
-                tenantId: Number(formData.tenantId)
+                endDate: formData.endDate ? new Date(formData.endDate).toISOString() : null,
+                checkInDate: formData.checkInDate ? new Date(formData.checkInDate).toISOString() : null,
+                checkOutDate: formData.checkOutDate ? new Date(formData.checkOutDate).toISOString() : null,
+                paymentFrequency: formData.paymentFrequency as PaymentFrequency
             };
 
-            // Appeler l'API
+            console.log('Fréquence de paiement envoyée:', formData.paymentFrequency);
+            console.log('Données envoyées au backend:', rentalData);
             const response = await api.post('/rentals', rentalData);
             setCreatedRentalData(response.data);
             setSuccess(true);
         } catch (err: any) {
-            console.error('Erreur détaillée:', err.response?.data);
-            setError(err.response?.data?.message?.[0] || 'Une erreur est survenue lors de la création de la location');
+            console.error('Erreur lors de la création de la location:', err);
+            setError(err.response?.data?.message || 'Une erreur est survenue lors de la création de la location');
+            setSuccess(false);
         } finally {
             setLoading(false);
         }
-    }, [formData]);
+    };
 
-    const cleanup = useCallback(() => {
+    const cleanup = () => {
         setFormData(DEFAULT_RENTAL_FORM_DATA);
         setError(null);
         setSuccess(false);
         setCreatedRentalData(null);
-    }, []);
+    };
 
     return {
         formData,
+        properties,
+        tenants,
         loading,
         loadingData,
         error,
         success,
-        properties,
-        tenants,
+        createdRentalData,
         handleChange,
         handleArrayChange,
         handleSubmit,
-        cleanup,
-        createdRentalData
+        cleanup
     };
 }; 

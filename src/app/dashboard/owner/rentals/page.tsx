@@ -235,46 +235,52 @@ export default function RentalsPage() {
                                         className="block hover:bg-gray-50 dark:hover:bg-gray-700 transition-colors duration-200"
                                     >
                                         <div className="px-4 py-4 sm:px-6">
-                                            <div className="flex items-center justify-between">
-                                                <div className="flex items-center">
+                                            <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between">
+                                                <div className="flex items-start space-x-4 mb-4 sm:mb-0">
                                                     <div className="flex-shrink-0">
                                                         <HiOutlineHome className="h-6 w-6 text-gray-400" />
                                                     </div>
-                                                    <div className="ml-4">
+                                                    <div>
                                                         <p className="text-sm font-medium text-gray-900 dark:text-white">
                                                             {rental.name}
                                                         </p>
-                                                        <p className="text-sm text-gray-500 dark:text-gray-400">
+                                                        <p className="text-sm text-gray-500 dark:text-gray-400 mt-1">
                                                             {rental.property?.identifier} - {rental.property?.address}, {rental.property?.city}
                                                         </p>
                                                     </div>
                                                 </div>
-                                                <div className="flex items-center space-x-6">
+                                                <div className="grid grid-cols-1 sm:grid-cols-3 gap-4 sm:gap-6 ml-10 sm:ml-0">
                                                     <div className="flex items-center">
-                                                        <HiOutlineUser className="h-5 w-5 text-gray-400 mr-2" />
-                                                        <span className="text-sm text-gray-500 dark:text-gray-400">
+                                                        <HiOutlineUser className="h-5 w-5 text-gray-400 mr-2 flex-shrink-0" />
+                                                        <span className="text-sm text-gray-500 dark:text-gray-400 truncate">
                                                             {rental.tenant?.firstName} {rental.tenant?.lastName}
                                                         </span>
                                                     </div>
                                                     <div className="flex items-center">
-                                                        <HiOutlineCurrencyEuro className="h-5 w-5 text-gray-400 mr-2" />
+                                                        <HiOutlineCurrencyEuro className="h-5 w-5 text-gray-400 mr-2 flex-shrink-0" />
                                                         <span className="text-sm text-gray-500 dark:text-gray-400">
                                                             {rental.rent}€{rental.charges ? ` + ${rental.charges}€` : ''}
                                                         </span>
                                                     </div>
                                                     <div className="flex items-center">
-                                                        <HiOutlineCalendar className="h-5 w-5 text-gray-400 mr-2" />
-                                                        <span className="text-sm text-gray-500 dark:text-gray-400">
+                                                        <HiOutlineCalendar className="h-5 w-5 text-gray-400 mr-2 flex-shrink-0" />
+                                                        <span className="text-sm text-gray-500 dark:text-gray-400 truncate">
                                                             {new Date(rental.startDate).toLocaleDateString()}
-                                                            {rental.endDate && ` → ${new Date(rental.endDate).toLocaleDateString()}`}
+                                                            {rental.endDate && (
+                                                                <>
+                                                                    <br className="sm:hidden" />
+                                                                    <span className="hidden sm:inline"> → </span>
+                                                                    {new Date(rental.endDate).toLocaleDateString()}
+                                                                </>
+                                                            )}
                                                         </span>
                                                     </div>
-                                                    <div className={`inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium ${rental.isActive
-                                                            ? 'bg-green-100 text-green-800 dark:bg-green-900/50 dark:text-green-400'
-                                                            : 'bg-red-100 text-red-800 dark:bg-red-900/50 dark:text-red-400'
-                                                        }`}>
-                                                        {rental.isActive ? 'Active' : 'Inactive'}
-                                                    </div>
+                                                </div>
+                                                <div className={`inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium mt-4 sm:mt-0 ${rental.isActive
+                                                    ? 'bg-green-100 text-green-800 dark:bg-green-900/50 dark:text-green-400'
+                                                    : 'bg-red-100 text-red-800 dark:bg-red-900/50 dark:text-red-400'
+                                                    }`}>
+                                                    {rental.isActive ? 'Active' : 'Inactive'}
                                                 </div>
                                             </div>
                                         </div>

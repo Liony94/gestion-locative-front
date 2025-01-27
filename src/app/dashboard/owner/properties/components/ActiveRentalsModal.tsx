@@ -13,6 +13,7 @@ interface Rental {
     endDate?: string;
     rent: number;
     charges?: number;
+    isActive: boolean;
     tenant?: {
         firstName: string;
         lastName: string;
@@ -89,8 +90,8 @@ export default function ActiveRentalsModal({ isOpen, onClose, propertyId, proper
                             leaveFrom="opacity-100 translate-y-0 sm:scale-100"
                             leaveTo="opacity-0 translate-y-4 sm:translate-y-0 sm:scale-95"
                         >
-                            <Dialog.Panel className="relative transform overflow-hidden rounded-lg bg-white dark:bg-gray-800 px-4 pb-4 pt-5 text-left shadow-xl transition-all sm:my-8 sm:w-full sm:max-w-2xl sm:p-6">
-                                <div className="absolute right-0 top-0 pr-4 pt-4">
+                            <Dialog.Panel className="relative transform overflow-hidden rounded-lg bg-white dark:bg-gray-800 px-4 pb-4 pt-5 text-left shadow-xl transition-all w-full sm:max-w-2xl sm:p-6 mx-4">
+                                <div className="absolute right-0 top-0 pr-4 pt-4 block">
                                     <button
                                         type="button"
                                         className="rounded-md bg-white dark:bg-gray-800 text-gray-400 hover:text-gray-500 dark:hover:text-gray-300 focus:outline-none"
@@ -126,24 +127,30 @@ export default function ActiveRentalsModal({ isOpen, onClose, propertyId, proper
                                                     <Link
                                                         key={rental.id}
                                                         href={`/dashboard/owner/rentals/${slug}`}
-                                                        className="block bg-gray-50 dark:bg-gray-700/50 rounded-lg p-4 space-y-3 hover:bg-gray-100 dark:hover:bg-gray-700 transition-colors duration-200 group"
+                                                        className="block bg-gray-50 dark:bg-gray-700/50 rounded-lg p-4 hover:bg-gray-100 dark:hover:bg-gray-700 transition-colors duration-200 group"
                                                     >
-                                                        <div className="flex justify-between items-start">
+                                                        <div className="flex justify-between items-start mb-3">
                                                             <h4 className="text-sm font-medium text-gray-900 dark:text-white group-hover:text-blue-600 dark:group-hover:text-blue-400">
                                                                 {rental.name}
                                                             </h4>
                                                             <HiOutlineChevronRight className="h-5 w-5 text-gray-400 group-hover:text-blue-600 dark:group-hover:text-blue-400" />
                                                         </div>
-                                                        <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+                                                        <div className="grid grid-cols-1 sm:grid-cols-3 gap-3">
                                                             <div className="flex items-center text-sm text-gray-600 dark:text-gray-300">
-                                                                <HiOutlineCalendar className="h-5 w-5 mr-2 text-gray-400" />
-                                                                <span>
+                                                                <HiOutlineCalendar className="h-5 w-5 mr-2 text-gray-400 flex-shrink-0" />
+                                                                <span className="truncate">
                                                                     {new Date(rental.startDate).toLocaleDateString()}
-                                                                    {rental.endDate && ` → ${new Date(rental.endDate).toLocaleDateString()}`}
+                                                                    {rental.endDate && (
+                                                                        <>
+                                                                            <br className="sm:hidden" />
+                                                                            <span className="hidden sm:inline"> → </span>
+                                                                            {new Date(rental.endDate).toLocaleDateString()}
+                                                                        </>
+                                                                    )}
                                                                 </span>
                                                             </div>
                                                             <div className="flex items-center text-sm text-gray-600 dark:text-gray-300">
-                                                                <HiOutlineCurrencyEuro className="h-5 w-5 mr-2 text-gray-400" />
+                                                                <HiOutlineCurrencyEuro className="h-5 w-5 mr-2 text-gray-400 flex-shrink-0" />
                                                                 <span>
                                                                     {rental.rent}€
                                                                     {rental.charges && ` + ${rental.charges}€`}
@@ -151,8 +158,8 @@ export default function ActiveRentalsModal({ isOpen, onClose, propertyId, proper
                                                             </div>
                                                             {rental.tenant && (
                                                                 <div className="flex items-center text-sm text-gray-600 dark:text-gray-300">
-                                                                    <HiOutlineUser className="h-5 w-5 mr-2 text-gray-400" />
-                                                                    <span>
+                                                                    <HiOutlineUser className="h-5 w-5 mr-2 text-gray-400 flex-shrink-0" />
+                                                                    <span className="truncate">
                                                                         {rental.tenant.firstName} {rental.tenant.lastName}
                                                                     </span>
                                                                 </div>

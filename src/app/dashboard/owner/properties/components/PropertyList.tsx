@@ -71,7 +71,8 @@ export default function PropertyList({ properties }: PropertyListProps) {
 
     return (
         <>
-            <div className="overflow-hidden bg-white dark:bg-gray-800 shadow-sm sm:rounded-lg">
+            {/* Version desktop */}
+            <div className="hidden md:block overflow-hidden bg-white dark:bg-gray-800 shadow-sm sm:rounded-lg">
                 <table className="min-w-full divide-y divide-gray-200 dark:divide-gray-700">
                     <thead className="bg-gray-50 dark:bg-gray-700">
                         <tr>
@@ -183,6 +184,97 @@ export default function PropertyList({ properties }: PropertyListProps) {
                         })}
                     </tbody>
                 </table>
+            </div>
+
+            {/* Version mobile */}
+            <div className="md:hidden space-y-4">
+                {properties.map((property) => {
+                    const slug = `${property.id}-${createSlug(property.identifier)}`;
+                    const activeLeaseCount = activeRentals[property.id] || 0;
+
+                    return (
+                        <div
+                            key={property.id}
+                            className="bg-white dark:bg-gray-800 shadow-sm rounded-lg overflow-hidden group hover:bg-gray-50 dark:hover:bg-gray-700/50 transition-colors duration-200"
+                            onClick={() => handleRowClick(slug)}
+                        >
+                            <div className="p-4 space-y-4">
+                                {/* En-tête avec nom et type */}
+                                <div className="flex items-center">
+                                    <div className="flex-shrink-0 h-10 w-10 bg-gray-100 dark:bg-gray-700 rounded-lg flex items-center justify-center">
+                                        <HiOutlineHome className="h-6 w-6 text-gray-500 dark:text-gray-400" />
+                                    </div>
+                                    <div className="ml-4">
+                                        <div className="text-sm font-medium text-gray-900 dark:text-white group-hover:text-blue-600 dark:group-hover:text-blue-400">
+                                            {property.identifier}
+                                        </div>
+                                        <div className="text-sm text-gray-500 dark:text-gray-400">
+                                            {property.type}
+                                        </div>
+                                    </div>
+                                </div>
+
+                                {/* Informations détaillées */}
+                                <div className="space-y-2">
+                                    <div className="flex items-center text-sm text-gray-600 dark:text-gray-300">
+                                        <HiOutlineLocationMarker className="h-5 w-5 mr-2 text-gray-400 flex-shrink-0" />
+                                        <span className="truncate">
+                                            {property.address}, {property.zipCode} {property.city}
+                                        </span>
+                                    </div>
+
+                                    <div className="flex items-center justify-between">
+                                        <div className="flex items-center text-sm text-gray-600 dark:text-gray-300">
+                                            <HiOutlineScale className="h-5 w-5 mr-2 text-gray-400" />
+                                            <span>{property.surface} m²</span>
+                                        </div>
+
+                                        <div className="flex items-center text-sm text-gray-600 dark:text-gray-300">
+                                            <HiOutlineCurrencyEuro className="h-5 w-5 mr-2 text-gray-400" />
+                                            <span>
+                                                {property.rentExcludingCharges} €
+                                                {property.charges && ` + ${property.charges}€`}
+                                            </span>
+                                        </div>
+                                    </div>
+
+                                    <div className="flex items-center justify-between pt-2 border-t border-gray-200 dark:border-gray-700" onClick={(e) => e.stopPropagation()}>
+                                        <div className="flex items-center text-sm text-gray-600 dark:text-gray-300">
+                                            <HiOutlineKey className="h-5 w-5 mr-2 text-gray-400" />
+                                            {loading ? (
+                                                <span className="animate-pulse">Chargement...</span>
+                                            ) : activeLeaseCount > 0 ? (
+                                                <button
+                                                    onClick={() => handleOpenModal(property)}
+                                                    className="text-blue-600 dark:text-blue-400 hover:text-blue-800 dark:hover:text-blue-300"
+                                                >
+                                                    {activeLeaseCount} location{activeLeaseCount > 1 ? 's' : ''} active{activeLeaseCount > 1 ? 's' : ''}
+                                                </button>
+                                            ) : (
+                                                <Link
+                                                    href={`/dashboard/owner/rentals/new?propertyId=${property.id}`}
+                                                    className="text-blue-600 dark:text-blue-400 hover:text-blue-800 dark:hover:text-blue-300"
+                                                >
+                                                    Créer une location
+                                                </Link>
+                                            )}
+                                        </div>
+
+                                        <button
+                                            className="text-blue-600 dark:text-blue-400 hover:text-blue-800 dark:hover:text-blue-300"
+                                            onClick={(e) => {
+                                                e.stopPropagation();
+                                                // TODO: Ajouter la logique de modification
+                                            }}
+                                        >
+                                            Modifier
+                                        </button>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    );
+                })}
             </div>
 
             {selectedProperty && (

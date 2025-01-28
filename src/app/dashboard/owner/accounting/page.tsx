@@ -41,7 +41,7 @@ export default function AccountingPage() {
             const [schedulesResponse, propertiesResponse, tenantsResponse] = await Promise.all([
                 api.get<PaymentSchedule[]>('/payments/schedules/owner'),
                 api.get<Property[]>('/properties/owner'),
-                api.get<User[]>('/user/role/tenant')
+                api.get<User[]>('/user/tenants')
             ]);
 
             console.log('Réponse des locataires:', tenantsResponse.data);
@@ -382,7 +382,7 @@ export default function AccountingPage() {
                             <option value="all">Toutes les propriétés</option>
                             {Array.isArray(properties) && properties.map((property) => (
                                 <option key={property.id} value={property.id}>
-                                    {property.title}
+                                    {property.identifier}
                                 </option>
                             ))}
                         </select>
